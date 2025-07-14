@@ -39,13 +39,18 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  avatar?: string;
+  avatarUrl?: string; // Corrected from avatar to avatarUrl
   level: number;
   xp: number;
   streak: number;
   totalWordsLearned: number;
-  achievements: Achievement[];
+  dailyGoal: number;
+  difficultyPreference: string;
+  notificationsEnabled: boolean;
+  publicProfile: boolean;
   createdAt: Date;
+  updatedAt: Date;
+  achievements?: Achievement[]; // Made optional as it's not in the login response
 }
 
 export interface Achievement {
