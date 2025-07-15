@@ -3,8 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Play, Brain, BookOpen, Edit, Share2, Users, Calendar, Globe, Lock, Star } from 'lucide-react';
 import { mockStudySets, mockVocabulary, mockUser } from '../data/mockData';
 import { StudySet, Vocabulary } from '../types';
+import api from '../utils/api';
+import { useAuth } from '../context/AuthContext';
+
 
 const StudySetDetail: React.FC = () => {
+  const { user } = useAuth();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [studySet, setStudySet] = useState<StudySet | null>(null);
@@ -15,19 +19,10 @@ const StudySetDetail: React.FC = () => {
     // Simulate API call
     const loadStudySet = async () => {
       setLoading(true);
-      
-      // Find study set
-      const foundStudySet = mockStudySets.find(set => set.id === id);
-      if (!foundStudySet) {
-        navigate('/study-sets');
-        return;
-      }
-
-      // Get vocabularies for this study set
-      const studySetVocabs = mockVocabulary.filter(vocab => vocab.studySetId === id);
-      
-      setStudySet(foundStudySet);
-      setVocabularies(studySetVocabs);
+      const res = await api.get(`/study-sets/${id}`);
+      console.log(res.data.data);
+      setStudySet(res.data.data);
+      setVocabularies(res.data.data.vocabularies);
       setLoading(false);
     };
 
@@ -90,7 +85,7 @@ const StudySetDetail: React.FC = () => {
     );
   }
 
-  const isOwner = studySet.createdBy === mockUser.id;
+  const isOwner = studySet.author?.id === user?.id;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -146,7 +141,7 @@ const StudySetDetail: React.FC = () => {
                 
                 <div className="flex items-center text-sm text-gray-600">
                   <Calendar className="h-4 w-4 mr-1" />
-                  Updated {studySet.updatedAt.toLocaleDateString()}
+                  Updated {studySet.updatedAt.toLocaleString()}
                 </div>
               </div>
 
@@ -160,7 +155,7 @@ const StudySetDetail: React.FC = () => {
                 </span>
                 
                 <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                  {studySet.category}
+                  {studySet.category.name}
                 </span>
 
                 <div className="flex items-center">

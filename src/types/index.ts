@@ -15,17 +15,23 @@ export interface StudySet {
   id: string;
   title: string;
   description: string;
-  category: string;
+  category: Category;
   level: 'beginner' | 'intermediate' | 'advanced';
   tags: string[];
   vocabularyCount: number;
-  createdBy: string;
+  createdBy?: string;
   isPublic: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
   vocabularies?: Vocabulary[];
+  author?: { id: string; name: string };
 }
-
+export interface StudySetResponse {
+  data: StudySet[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
 export interface UserProgress {
   id: string;
   userId: string;

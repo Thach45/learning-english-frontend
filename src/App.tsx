@@ -7,7 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 // Pages
 import Dashboard from './pages/Dashboard';
 import StudySets from './pages/StudySets';
-import CreateStudySet from './pages/CreateStudySet';
+
 import StudySetDetail from './pages/StudySetDetail';
 import Learn from './pages/Learn';
 import Achievements from './pages/Achievements';
@@ -31,7 +31,7 @@ function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<Dashboard />} />
               <Route path="/study-sets" element={<StudySets />} />
-              <Route path="/study-sets/create" element={<CreateStudySet />} />
+              {/* <Route path="/study-sets/create" element={<CreateStudySet />} /> */}
               <Route path="/study-sets/:id" element={<StudySetDetail />} />
               <Route path="/learn" element={<Learn />} />
               <Route path="/learn/flashcards" element={<Learn />} />
