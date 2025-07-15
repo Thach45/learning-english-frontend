@@ -5,7 +5,7 @@ import { User } from '../types';
 import { BookOpen, TrendingUp, Star, Trophy, Target, Clock } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
-    const { user, accessToken, login } = useAuth();
+    const { user, accessToken, refreshToken, login } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -20,7 +20,7 @@ const Dashboard: React.FC = () => {
                     if (response.ok) {
                         const { data } = await response.json();
                         // The login function in context updates the user and stores it
-                        login(accessToken, data as User);
+                        login(accessToken, refreshToken ?? null, data as User);
                     } else {
                         console.error('Failed to fetch user data');
                         // Optional: handle logout if token is invalid

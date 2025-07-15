@@ -28,7 +28,7 @@ const RegisterPage: React.FC = () => {
 
             // Automatically log in the user after registration
             const { data } = await response.json();
-            login(data.accessToken, data.user);
+            login(data.accessToken, data.refreshToken, data.user);
             navigate('/'); // Redirect to dashboard
 
         } catch (err: any) {

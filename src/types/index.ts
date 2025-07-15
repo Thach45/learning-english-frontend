@@ -89,4 +89,5 @@ export interface Category {
   icon: string;
   color: string;
   vocabularyCount: number;
+  imageUrl?: string | null;
 }

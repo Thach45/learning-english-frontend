@@ -14,6 +14,8 @@ import Achievements from './pages/Achievements';
 import Profile from './pages/Profile';
 import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
+import Categories from './pages/Categories';
+
 
 function App() {
   return (
@@ -36,6 +38,7 @@ function App() {
               <Route path="/learn/quiz" element={<Learn />} />
               <Route path="/achievements" element={<Achievements />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/categories" element={<Categories />} />
             </Route>
           </Route>
         </Routes>

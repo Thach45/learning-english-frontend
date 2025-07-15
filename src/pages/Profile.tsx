@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 const ProfilePage: React.FC = () => {
-    const { user, login, accessToken } = useAuth();
+    const { user, login, accessToken, refreshToken } = useAuth();
     const [activeTab, setActiveTab] = useState('profile');
 
     // State for profile form
@@ -27,8 +27,8 @@ const ProfilePage: React.FC = () => {
             const updatedUser = await response.json();
             if (!response.ok) throw new Error(updatedUser.message || 'Failed to update profile');
             
-            // Update user in context
-            login(accessToken!, updatedUser.data);
+            // Update user in context, keep current refreshToken
+            login(accessToken!, refreshToken ?? null, updatedUser.data);
             setMessage({ type: 'success', text: 'Profile updated successfully!' });
         } catch (err: any) {
             setMessage({ type: 'error', text: err.message });

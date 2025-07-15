@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, BookOpen, Brain, Trophy, User, Upload, Settings, Menu, X, LogOut } from 'lucide-react';
+import { Home, BookOpen, Brain, Trophy, User, Upload, Settings, Menu, X, LogOut, Folder } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface NavItemProps {
@@ -82,6 +82,7 @@ const Navigation: React.FC = () => {
 
   const navItems = [
     { id: '/', label: 'Dashboard', icon: Home },
+    { id: '/categories', label: 'Categories', icon: Folder },
     { id: '/study-sets', label: 'Study Sets', icon: BookOpen },
     { id: '/learn', label: 'Learn', icon: Brain },
     { id: '/achievements', label: 'Achievements', icon: Trophy },
