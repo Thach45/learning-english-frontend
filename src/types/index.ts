@@ -88,6 +88,6 @@ export interface Category {
   description: string;
   icon: string;
   color: string;
-  vocabularyCount: number;
+  totalStudySet: number;
   imageUrl?: string | null;
 }
