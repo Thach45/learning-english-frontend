@@ -13,6 +13,10 @@ import {
 import { Category } from "../types";
 import api from "../utils/api";
 import CategoryStudySetsModal from '../components/pageCategory/CategoryStudySetsModal';
+import CategoryCard from '../components/pageCategory/CategoryCard';
+import CategoryModal from '../components/pageCategory/CategoryModal';
+import ConfirmDeleteModal from '../components/pageCategory/ConfirmDeleteModal';
+import ConfirmEditModal from '../components/pageCategory/ConfirmEditModal';
 
 const Categories: React.FC = () => {
   const navigate = useNavigate();
@@ -407,121 +411,20 @@ const Categories: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredCategories.map((category) => (
-            <div
+            <CategoryCard
               key={category.id}
-              className="group bg-white rounded-xl shadow transition-all border border-gray-100 hover:shadow-xl hover:scale-[1.025] p-0 flex flex-col overflow-hidden relative"
-            >
-              {/* Image or Icon */}
-              <div className="flex items-center justify-center h-32 bg-gradient-to-br from-blue-50 to-purple-50 relative">
-                {category.imageUrl ? (
-                  <img
-                    src={category.imageUrl}
-                    alt={category.name}
-                    className="w-20 h-20 object-cover rounded-full border-4 border-white shadow-lg bg-gray-100"
-                  />
-                ) : (
-                  <div
-                    className={`w-20 h-20 flex items-center justify-center text-4xl font-bold rounded-full shadow-lg ${category.color} bg-opacity-90 text-white border-4 border-white`}
-                  >
-                    {category.icon}
-                  </div>
-                )}
-                {/* Edit/Delete buttons (absolute, only visible on hover desktop, always on mobile) */}
-                <div className="absolute top-2 right-2 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity sm:opacity-100">
-                  <button
-                    onClick={() => handleEditCategory(category)}
-                    className="w-9 h-9 flex items-center justify-center rounded-full bg-white shadow hover:bg-blue-100 text-blue-600 border border-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    aria-label="Edit category"
-                    disabled={deleteLoading === category.id}
-                  >
-                    <Edit className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteCategory(category.id)}
-                    className={`w-9 h-9 flex items-center justify-center rounded-full bg-white shadow hover:bg-red-100 text-red-600 border border-red-100 focus:outline-none focus:ring-2 focus:ring-red-400 ${
-                      deleteLoading === category.id
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                    }`}
-                    aria-label="Delete category"
-                    disabled={deleteLoading === category.id}
-                  >
-                    {deleteLoading === category.id ? (
-                      <span className="w-5 h-5 inline-block animate-spin border-2 border-gray-400 border-t-transparent rounded-full"></span>
-                    ) : (
-                      <Trash2 className="h-5 w-5" />
-                    )}
-                  </button>
-                </div>
-              </div>
-              {/* Content */}
-              <div className="flex-1 flex flex-col px-6 pt-4 pb-6">
-                <div className="flex items-center mb-2">
-                  <h3
-                    className="text-xl font-bold text-gray-900 flex-1 truncate"
-                    title={category.name}
-                  >
-                    {category.name}
-                  </h3>
-                </div>
-                <div className="flex items-center mb-2">
-                  <BookOpen className="h-5 w-5 text-blue-400 mr-1" />
-                  <span className="font-semibold text-blue-700 text-sm">
-                    {category.totalStudySet} study set
-                    {category.totalStudySet === 1 ? "" : "s"}
-                  </span>
-                </div>
-                {category.description && (
-                  <div className="text-gray-500 text-sm mt-1 line-clamp-2">
-                    {category.description}
-                  </div>
-                )}
-                {/* Action buttons */}
-                <div className="flex items-center mt-4 space-x-2">
-                  <button
-                    className="flex items-center px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-sm font-medium"
-                    onClick={() => handleOpenStudySetsModal(category, 1)}
-                  >
-                    <ChevronDown className="w-4 h-4 mr-1" />
-                    View Study Sets
-                  </button>
-                  <button
-                    className="flex items-center px-3 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded text-sm font-medium"
-                    onClick={() => openCreateStudySetModal(category.id)}
-                  >
-                    <PlusCircle className="w-4 h-4 mr-1" />
-                    Create Study Set
-                  </button>
-                </div>
-                {/* Collapse study sets list */}
-                {expandedCategory === category.id && (
-                  <div className="mt-4 bg-gray-50 rounded p-3 border border-gray-200">
-                    {categoryStudySets[category.id]?.loading ? (
-                      <div className="text-gray-400 text-sm">
-                        Loading study sets...
-                      </div>
-                    ) : categoryStudySets[category.id]?.data.length ? (
-                      <ul className="space-y-1">
-                        {categoryStudySets[category.id].data.map((ss) => (
-                          <li key={ss.id}>
-                            <button
-                              className="text-blue-600 hover:underline text-sm"
-                              onClick={() => navigate(`/study-sets/${ss.id}`)}
-                            >
-                              {ss.title}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <div className="text-gray-500 text-sm">
-                        No study sets in this category.
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
+              category={category}
+              onEdit={handleEditCategory}
+              onDelete={handleDeleteCategory}
+              onViewStudySets={handleOpenStudySetsModal}
+              onCreateStudySet={openCreateStudySetModal}
+              expanded={expandedCategory === category.id}
+              onToggleExpand={handleToggleStudySets}
+              studySets={categoryStudySets[category.id]?.data || []}
+              loadingStudySets={categoryStudySets[category.id]?.loading || false}
+              navigate={navigate}
+              deleteLoading={deleteLoading}
+            />
           ))}
         </div>
       )}
@@ -542,246 +445,44 @@ const Categories: React.FC = () => {
       )}
 
       {/* Create/Edit Category Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {modalMode === "create" ? "Create New Category" : "Edit Category"}
-            </h3>
-            <form onSubmit={handleModalSubmit} className="space-y-4">
-              {/* Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category Name *
-                </label>
-                <input
-                  type="text"
-                  value={modalCategory.name}
-                  onChange={(e) =>
-                    setModalCategory({ ...modalCategory, name: e.target.value })
-                  }
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., Business English"
-                  required
-                  disabled={modalLoading}
-                />
-              </div>
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description
-                </label>
-                <textarea
-                  value={modalCategory.description}
-                  onChange={(e) =>
-                    setModalCategory({
-                      ...modalCategory,
-                      description: e.target.value,
-                    })
-                  }
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  rows={2}
-                  placeholder="Describe what this category covers..."
-                  disabled={modalLoading}
-                />
-              </div>
-              {/* Icon */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Icon *
-                </label>
-                <div className="grid grid-cols-6 gap-2">
-                  {iconOptions.map((icon) => (
-                    <button
-                      key={icon}
-                      type="button"
-                      onClick={() =>
-                        setModalCategory({ ...modalCategory, icon })
-                      }
-                      className={`p-3 text-xl border-2 rounded-lg transition-colors ${
-                        modalCategory.icon === icon
-                          ? "border-blue-500 bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                      disabled={modalLoading}
-                    >
-                      {icon}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {/* Color */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Color *
-                </label>
-                <div className="grid grid-cols-4 gap-2">
-                  {colorOptions.map((color) => (
-                    <button
-                      key={color.value}
-                      type="button"
-                      onClick={() =>
-                        setModalCategory({
-                          ...modalCategory,
-                          color: color.value,
-                        })
-                      }
-                      className={`p-3 rounded-lg border-2 transition-colors ${
-                        modalCategory.color === color.value
-                          ? "border-gray-800"
-                          : "border-gray-200"
-                      }`}
-                      style={{ backgroundColor: color.color }}
-                      disabled={modalLoading}
-                    >
-                      <span className="text-white font-medium text-sm">
-                        {color.label}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {/* Image URL */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image URL (optional)
-                </label>
-                <input
-                  type="text"
-                  value={modalCategory.imageUrl}
-                  onChange={(e) =>
-                    setModalCategory({
-                      ...modalCategory,
-                      imageUrl: e.target.value,
-                    })
-                  }
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="https://..."
-                  disabled={modalLoading}
-                />
-              </div>
-              {modalError && (
-                <div className="text-red-500 text-sm">{modalError}</div>
-              )}
-              <div className="flex space-x-3 mt-6">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowModal(false);
-                    setModalCategory({
-                      id: "",
-                      name: "",
-                      description: "",
-                      icon: "📚",
-                      color: "bg-blue-500",
-                      imageUrl: "",
-                    });
-                    setModalError(null);
-                  }}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                  disabled={modalLoading}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors"
-                  disabled={modalLoading}
-                >
-                  {modalLoading
-                    ? modalMode === "create"
-                      ? "Creating..."
-                      : "Saving..."
-                    : modalMode === "create"
-                    ? "Create"
-                    : "Save"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
+      <CategoryModal
+        open={showModal}
+        mode={modalMode}
+        category={modalCategory}
+        onChange={setModalCategory}
+        onClose={() => {
+          setShowModal(false);
+          setModalCategory({
+            id: "",
+            name: "",
+            description: "",
+            icon: "📚",
+            color: "bg-blue-500",
+            imageUrl: "",
+          });
+          setModalError(null);
+        }}
+        onSubmit={handleModalSubmit}
+        loading={modalLoading}
+        error={modalError}
+        iconOptions={iconOptions}
+        colorOptions={colorOptions}
+      />
       {/* Confirm Delete Modal */}
-      {confirmDeleteId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Delete Category
-            </h3>
-            <p className="mb-6 text-gray-700">
-              Are you sure you want to delete this category? This action cannot
-              be undone.
-            </p>
-            <div className="flex space-x-3">
-              <button
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                onClick={() => setConfirmDeleteId(null)}
-                disabled={deleteLoading === confirmDeleteId}
-              >
-                Cancel
-              </button>
-              <button
-                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:bg-gray-400"
-                onClick={confirmDelete}
-                disabled={deleteLoading === confirmDeleteId}
-              >
-                {deleteLoading === confirmDeleteId ? "Deleting..." : "Delete"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+      <ConfirmDeleteModal
+        open={!!confirmDeleteId}
+        onCancel={() => setConfirmDeleteId(null)}
+        onConfirm={confirmDelete}
+        loading={deleteLoading === confirmDeleteId}
+      />
       {/* Confirm Edit Modal (before save) */}
-      {confirmEdit && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Confirm Edit
-            </h3>
-            <div className="mb-4">
-              <div className="flex items-center mb-2">
-                <span
-                  className={`w-8 h-8 ${modalCategory.color} rounded-lg flex items-center justify-center text-xl mr-2`}
-                >
-                  {modalCategory.icon}
-                </span>
-                <span className="font-bold text-gray-900">
-                  {modalCategory.name}
-                </span>
-              </div>
-              <div className="text-gray-700 text-sm mb-1">
-                {modalCategory.description}
-              </div>
-              {modalCategory.imageUrl && (
-                <div className="text-xs text-gray-500">
-                  Image: {modalCategory.imageUrl}
-                </div>
-              )}
-            </div>
-            <p className="mb-6 text-gray-700">
-              Are you sure you want to save these changes?
-            </p>
-            <div className="flex space-x-3">
-              <button
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                onClick={() => setConfirmEdit(false)}
-                disabled={modalLoading}
-              >
-                Cancel
-              </button>
-              <button
-                className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:bg-gray-400"
-                onClick={doSaveCategory}
-                disabled={modalLoading}
-              >
-                {modalLoading ? "Saving..." : "Save"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmEditModal
+        open={confirmEdit}
+        category={modalCategory}
+        onCancel={() => setConfirmEdit(false)}
+        onConfirm={doSaveCategory}
+        loading={modalLoading}
+      />
 
       {/* Study Sets Modal */}
       {showStudySetsModal.open && showStudySetsModal.category && (
