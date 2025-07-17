@@ -97,3 +97,18 @@ export interface Category {
   totalStudySet: number;
   imageUrl?: string | null;
 }
+
+export interface AddVocabulary {
+ 
+  word: string;
+  pronunciation?: string;
+  meaning: string;
+  definition?: string;
+  example?: string;
+  imageUrl?: string;
+  audioUrl?: string;
+}
+
+export interface UpdateVocabulary extends AddVocabulary {
+  id: string;
+}

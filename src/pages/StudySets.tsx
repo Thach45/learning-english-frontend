@@ -37,36 +37,36 @@ const StudySets: React.FC = () => {
     { id: 'INTERMEDIATE', name: 'Intermediate' },
     { id: 'ADVANCED', name: 'Advanced' }
   ];
-
-  useEffect(() => {
-    const fetchStudySets = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const params: any = {
-          page,
-          pageSize,
-        };
-        if (filterCategory !== 'all') params.category = filterCategory;
-        if (searchTerm) params.search = searchTerm;
-        // Level filter is frontend only for now
-        const res = await api.get('/study-sets', { params });
-        api.get('/categories').then(res => {
-          setCategories(res.data.data.data.map((cat: any) => ({ id: cat.id, name: cat.name })));
-        });
-        let dataWithPageSize: StudySetResponse = res.data.data;
-        let data: StudySet[] = dataWithPageSize.data;
-        if (filterLevel !== 'all') {
-          data = data.filter(set => set.level === filterLevel);
-        }
-        setStudySets(data);
-        setTotal(dataWithPageSize.total);
-      } catch (err: any) {
-        setError('Failed to load study sets');
-      } finally {
-        setLoading(false);
+  const fetchStudySets = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const params: any = {
+        page,
+        pageSize,
+      };
+      if (filterCategory !== 'all') params.category = filterCategory;
+      if (searchTerm) params.search = searchTerm;
+      // Level filter is frontend only for now
+      const res = await api.get('/study-sets', { params });
+      api.get('/categories').then(res => {
+        setCategories(res.data.data.data.map((cat: any) => ({ id: cat.id, name: cat.name })));
+      });
+      let dataWithPageSize: StudySetResponse = res.data.data;
+      let data: StudySet[] = dataWithPageSize.data;
+      if (filterLevel !== 'all') {
+        data = data.filter(set => set.level === filterLevel);
       }
-    };
+      setStudySets(data);
+      setTotal(dataWithPageSize.total);
+    } catch (err: any) {
+      setError('Failed to load study sets');
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    
     fetchStudySets();
   }, [page, pageSize, filterCategory, searchTerm, filterLevel]);
 
@@ -121,7 +121,7 @@ const StudySets: React.FC = () => {
       setPage(1);
       // Chuyển hướng sang trang chi tiết để thêm từ vựng
     
-      navigate(`/study-sets/${res.data.data.data._id}`);
+      navigate(`/study-sets/${res.data.data.id}`);
     } catch (error: any) {
       alert(error?.response?.data?.message || 'Tạo study set thất bại.');
       setCreateLoading(false);
@@ -134,7 +134,7 @@ const StudySets: React.FC = () => {
     try {
       await api.delete(`/study-sets/${deleteId}`);
       setDeleteId(null);
-      // Reload danh sách
+      fetchStudySets();
       setPage(1);
     } catch (err) {
       alert('Xoá thất bại!');

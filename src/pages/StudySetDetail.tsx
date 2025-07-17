@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Play, Brain, BookOpen, Edit, Share2, Users, Calendar, Globe, Lock, Star } from 'lucide-react';
-import { mockStudySets, mockVocabulary, mockUser } from '../data/mockData';
-import { StudySet, Vocabulary } from '../types';
+import { ArrowLeft, Play, Brain, BookOpen, Edit, Share2, Users, Calendar, Globe, Lock, Star, X } from 'lucide-react';
+import { AddVocabulary, StudySet, UpdateVocabulary, Vocabulary } from '../types';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -14,6 +13,22 @@ const StudySetDetail: React.FC = () => {
   const [studySet, setStudySet] = useState<StudySet | null>(null);
   const [vocabularies, setVocabularies] = useState<Vocabulary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAddVocabModal, setShowAddVocabModal] = useState(false);
+  const [addLoading, setAddLoading] = useState(false);
+  const [newVocab, setNewVocab] = useState<AddVocabulary>({
+    word: '',
+    meaning: '',
+    pronunciation: '',
+    definition: '',
+    example: '',
+    imageUrl: '',
+ 
+  });
+  const [editVocab, setEditVocab] = useState<UpdateVocabulary | null>(null);
+  const [showEditVocabModal, setShowEditVocabModal] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
+  const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null);
+  const [deleteConfirmVocab, setDeleteConfirmVocab] = useState<Vocabulary | null>(null);
 
   useEffect(() => {
     // Simulate API call
@@ -55,6 +70,64 @@ const StudySetDetail: React.FC = () => {
       navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
       alert('Study set link copied to clipboard!');
     }
+  };
+
+  const handleAddVocabulary = async () => {
+    setAddLoading(true);
+    try {
+      
+      const res = await api.post(`/study-sets/${id}/vocabularies`, newVocab);
+      
+      setVocabularies((prev) => [...prev, res.data.data]);
+      setShowAddVocabModal(false);
+      setNewVocab({ word: '', meaning: '', pronunciation: '', definition: '', example: '', imageUrl: '' });
+    } catch (error: any) {
+      console.log(error);
+      alert(error?.response?.data?.message || 'Thêm từ vựng thất bại.');
+    }
+    setAddLoading(false);
+  };
+
+  const handleEditVocab = (vocab: Vocabulary) => {
+    setEditVocab(vocab);
+    setShowEditVocabModal(true);
+  };
+
+  const handleUpdateVocab = async () => {
+    if (!editVocab) return;
+    setEditLoading(true);
+    try {
+      const updatedVocab = {
+        word: editVocab.word,
+        meaning: editVocab.meaning,
+        pronunciation: editVocab.pronunciation,
+        definition: editVocab.definition,
+        example: editVocab.example,
+        imageUrl: editVocab.imageUrl,
+      }
+      console.log("editVocab", updatedVocab);
+      const res = await api.put(`/study-sets/${id}/vocabularies/${editVocab.id}`, updatedVocab);
+      console.log(res);
+      setVocabularies((prev) => prev.map(v => v.id === editVocab.id ? res.data.data : v));
+      setShowEditVocabModal(false);
+      setEditVocab(null);
+    } catch (error: any) {
+      alert(error?.response?.data?.message || 'Cập nhật từ vựng thất bại.');
+    }
+    setEditLoading(false);
+  };
+
+  const handleDeleteVocab = async () => {
+    if (!deleteConfirmVocab) return;
+    setDeleteLoadingId(deleteConfirmVocab.id);
+    try {
+      await api.delete(`/study-sets/${id}/vocabularies/${deleteConfirmVocab.id}`);
+      setVocabularies((prev) => prev.filter(v => v.id !== deleteConfirmVocab.id));
+      setDeleteConfirmVocab(null);
+    } catch (error: any) {
+      alert(error?.response?.data?.message || 'Xoá từ vựng thất bại.');
+    }
+    setDeleteLoadingId(null);
   };
 
   if (loading) {
@@ -210,10 +283,19 @@ const StudySetDetail: React.FC = () => {
 
         {/* Vocabulary Preview */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">
-            Vocabulary Terms ({vocabularies.length})
-          </h2>
-          
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-900">
+              Vocabulary Terms ({vocabularies.length})
+            </h2>
+            {isOwner && (
+              <button
+                onClick={() => setShowAddVocabModal(true)}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
+              >
+                + Add Vocabulary
+              </button>
+            )}
+          </div>
           {vocabularies.length > 0 ? (
             <div className="space-y-4">
               {vocabularies.map((vocab, index) => (
@@ -254,6 +336,32 @@ const StudySetDetail: React.FC = () => {
                       />
                     )}
                   </div>
+                  <div className="flex flex-col items-end ml-4 space-y-2">
+                    {vocab.imageUrl && (
+                      <img
+                        src={vocab.imageUrl}
+                        alt={vocab.word}
+                        className="w-16 h-16 object-cover rounded-lg mb-2"
+                      />
+                    )}
+                    {isOwner && (
+                      <div className="flex space-x-2">
+                        <button
+                          className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-xs"
+                          onClick={() => handleEditVocab(vocab)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="px-2 py-1 bg-red-200 hover:bg-red-300 rounded text-xs text-red-700 disabled:opacity-60"
+                          onClick={() => setDeleteConfirmVocab(vocab)}
+                          disabled={deleteLoadingId === vocab.id}
+                        >
+                          {deleteLoadingId === vocab.id ? 'Deleting...' : 'Delete'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -263,16 +371,172 @@ const StudySetDetail: React.FC = () => {
               <h3 className="text-lg font-medium text-gray-900 mb-2">No vocabulary terms yet</h3>
               <p className="text-gray-600 mb-4">This study set doesn't have any vocabulary terms.</p>
               {isOwner && (
-                <button
-                  onClick={handleEdit}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                >
-                  Add Vocabulary Terms
-                </button>
-              )}
+              <button
+                onClick={() => setShowAddVocabModal(true)}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
+              >
+                + Add Vocabulary
+              </button>
+            )}
             </div>
           )}
         </div>
+
+        {/* Add Vocabulary Modal */}
+        {showAddVocabModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+            <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-lg relative">
+              <button
+                className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+                onClick={() => setShowAddVocabModal(false)}
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <h3 className="text-xl font-bold mb-4">Add new vocabulary</h3>
+              <div className="space-y-3">
+                <input
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="English word *"
+                  value={newVocab.word}
+                  onChange={e => setNewVocab(v => ({ ...v, word: e.target.value }))}
+                  required
+                />
+                <input
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="Vietnamese meaning *"
+                  value={newVocab.meaning}
+                  onChange={e => setNewVocab(v => ({ ...v, meaning: e.target.value }))}
+                  required
+                />
+                <input
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="Pronunciation"
+                  value={newVocab.pronunciation}
+                  onChange={e => setNewVocab(v => ({ ...v, pronunciation: e.target.value }))}
+                />
+                <input
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="Definition"
+                  value={newVocab.definition}
+                  onChange={e => setNewVocab(v => ({ ...v, definition: e.target.value }))}
+                />
+                <input
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="Example"
+                  value={newVocab.example}
+                  onChange={e => setNewVocab(v => ({ ...v, example: e.target.value }))}
+                  
+                />
+                <input
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="Image (URL)"
+                  value={newVocab.imageUrl}
+                  onChange={e => setNewVocab(v => ({ ...v, imageUrl: e.target.value }))}
+                />
+              </div>
+              <button
+                className="mt-6 w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-lg disabled:opacity-60"
+                onClick={handleAddVocabulary}
+                disabled={addLoading || !newVocab.word || !newVocab.meaning}
+              >
+                {addLoading ? 'Adding...' : 'Add vocabulary'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Vocabulary Modal */}
+        {showEditVocabModal && editVocab && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+            <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-lg relative">
+              <button
+                className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+                onClick={() => setShowEditVocabModal(false)}
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <h3 className="text-xl font-bold mb-4">Edit vocabulary</h3>
+              <div className="space-y-3">
+                <input
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="English word *"
+                  value={editVocab.word}
+                  onChange={e => setEditVocab(v => v ? { ...v, word: e.target.value } : v)}
+                  required
+                />
+                <input
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="Vietnamese meaning *"
+                  value={editVocab.meaning}
+                  onChange={e => setEditVocab(v => v ? { ...v, meaning: e.target.value } : v)}
+                  required
+                />
+                <input
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="Pronunciation"
+                  value={editVocab.pronunciation}
+                  onChange={e => setEditVocab(v => v ? { ...v, pronunciation: e.target.value } : v)}
+                />
+                <input
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="Definition"
+                  value={editVocab.definition}
+                  onChange={e => setEditVocab(v => v ? { ...v, definition: e.target.value } : v)}
+                />
+                <input
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="Example"
+                  value={editVocab.example}
+                  onChange={e => setEditVocab(v => v ? { ...v, example: e.target.value } : v)}
+                />
+                <input
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="Image (URL)"
+                  value={editVocab.imageUrl}
+                  onChange={e => setEditVocab(v => v ? { ...v, imageUrl: e.target.value } : v)}
+                />
+              </div>
+              <button
+                className="mt-6 w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-lg disabled:opacity-60"
+                onClick={handleUpdateVocab}
+                disabled={editLoading || !editVocab.word || !editVocab.meaning}
+              >
+                {editLoading ? 'Saving...' : 'Save changes'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirm Modal */}
+        {deleteConfirmVocab && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+            <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md relative">
+              <button
+                className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+                onClick={() => setDeleteConfirmVocab(null)}
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <h3 className="text-xl font-bold mb-4 text-red-600">Confirm delete vocabulary</h3>
+              <p className="mb-6">Are you sure you want to delete the word <span className="font-semibold">"{deleteConfirmVocab.word}"</span> ? This action cannot be undone.</p>
+              <div className="flex justify-end space-x-3">
+                <button
+                  className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+                  onClick={() => setDeleteConfirmVocab(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white disabled:opacity-60"
+                  onClick={handleDeleteVocab}
+                  disabled={deleteLoadingId === deleteConfirmVocab.id}
+                >
+                  {deleteLoadingId === deleteConfirmVocab.id ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Study Tips */}
         <div className="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6">

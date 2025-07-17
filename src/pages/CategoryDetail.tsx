@@ -29,11 +29,11 @@ const CategoryDetailPage: React.FC = () => {
             try {
                 // Fetch category info
                 const catResponse = await api.get(`/categories/${categoryId}`);
-                setCategory(catResponse.data);
+                setCategory(catResponse.data.data.data);
 
                 // Fetch study sets in this category
                 const ssResponse = await api.get(`/study-sets?category=${categoryId}`);
-                setStudySets(ssResponse.data);
+                setStudySets(ssResponse.data.data.data);
 
             } catch (err: any) {
                 setError(err.message || 'Failed to fetch category details.');

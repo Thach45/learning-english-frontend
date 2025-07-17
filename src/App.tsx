@@ -15,6 +15,7 @@ import Profile from './pages/Profile';
 import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
 import Categories from './pages/Categories';
+import CategoryDetailPage from './pages/CategoryDetail';
 
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
               <Route path="/achievements" element={<Achievements />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/categories" element={<Categories />} />
+              <Route path="/categories/:id" element={<CategoryDetailPage />} />
             </Route>
           </Route>
         </Routes>
