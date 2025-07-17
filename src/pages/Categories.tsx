@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Category } from "../types";
 import api from "../utils/api";
+import CategoryStudySetsModal from '../components/pageCategory/CategoryStudySetsModal';
 
 const Categories: React.FC = () => {
   const navigate = useNavigate();
@@ -51,7 +52,6 @@ const Categories: React.FC = () => {
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null); // id of deleting category
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [confirmEdit, setConfirmEdit] = useState(false);
-  const [page, setPage] = useState(1);
   
   const [showStudySetsModal, setShowStudySetsModal] = useState<{
     open: boolean;
@@ -61,20 +61,19 @@ const Categories: React.FC = () => {
     loading: boolean;
     data: any[];
   }>({ loading: false, data: [] });
+  const [visibleCount, setVisibleCount] = useState(4);
 
   const handleOpenStudySetsModal = async (category: Category, page: number) => {
     setShowStudySetsModal({ open: true, category });
     setModalStudySets({ loading: true, data: [] });
     try {
       const res = await api.get(
-        `/study-sets?category=${category.id}&page=${page}`
+        `/study-sets?category=${category.id}&page=1&pageSize=10000`
       );
       console.log("res", res.data.data.data);
       setModalStudySets({
         loading: false,
-        data: {
-          ...modalStudySets.data,
-          ...res.data.data.data.map((ss: any) => ({
+        data: res.data.data.data.map((ss: any) => ({
           id: ss.id,
           title: ss.title,
           level: ss.level,
@@ -84,7 +83,7 @@ const Categories: React.FC = () => {
           createdAt: ss.createdAt,
           isPublic: ss.isPublic,
           })),
-        },
+        
       });
       console.log("modalStudySets", modalStudySets);
     } catch {
@@ -125,6 +124,10 @@ const Categories: React.FC = () => {
     fetchCategories();
     // eslint-disable-next-line
   }, []);
+
+  useEffect(() => {
+    if (showStudySetsModal.open) setVisibleCount(4);
+  }, [showStudySetsModal.open]);
 
   // Modal submit handler (create or edit)
   const handleModalSubmit = async (e: React.FormEvent) => {
@@ -782,120 +785,15 @@ const Categories: React.FC = () => {
 
       {/* Study Sets Modal */}
       {showStudySetsModal.open && showStudySetsModal.category && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md relative max-h-[80vh]">
-            <button
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
-              onClick={handleCloseStudySetsModal}
-            >
-              <span className="text-2xl">&times;</span>
-            </button>
-            <h3 className="text-xl font-bold mb-4">
-              Study Sets in "{showStudySetsModal.category.name}"
-            </h3>
-            {modalStudySets.loading ? (
-              <div className="text-gray-400 text-center py-8">
-                Loading study sets...
-              </div>
-            ) : modalStudySets.data.length ? (
-              <div className="space-y-4 mb-4 max-h-[50vh] overflow-y-auto">
-                {modalStudySets.data.map((ss) => (
-                  <div
-                    key={ss.id}
-                    className="border border-gray-200 rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition flex flex-col cursor-pointer"
-                    onClick={() => {
-                      handleCloseStudySetsModal();
-                      navigate(`/study-sets/${ss.id}`);
-                    }}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-lg font-bold text-blue-800 line-clamp-1">
-                        {ss.title}
-                      </span>
-                      <span
-                        className={`px-2 py-0.5 rounded text-xs font-semibold ml-2 ${
-                          ss.level === "BEGINNER"
-                            ? "bg-green-100 text-green-700"
-                            : ss.level === "INTERMEDIATE"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
-                      >
-                        {ss.level}
-                      </span>
-                      {ss.isPublic ? (
-                        <span className="ml-2 px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-xs font-medium">
-                          Public
-                        </span>
-                      ) : (
-                        <span className="ml-2 px-2 py-0.5 rounded bg-gray-200 text-gray-600 text-xs font-medium">
-                          Private
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center text-sm text-gray-600 mb-1 space-x-4">
-                      <span className="flex items-center">
-                        <BookOpen className="w-4 h-4 mr-1" />
-                        {ss.vocabularyCount} terms
-                      </span>
-                      <span className="flex items-center">
-                        <span className="mr-1">{ss.likesCount}</span>
-                        <span role="img" aria-label="likes">
-                          ❤️
-                        </span>
-                      </span>
-                      <span className="text-xs text-gray-400">
-                        {ss.createdAt
-                          ? new Date(ss.createdAt).toLocaleDateString()
-                          : ""}
-                      </span>
-                    </div>
-                    {ss.tags && ss.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {ss.tags.map((tag: string, idx: number) => (
-                          <span
-                            key={idx}
-                            className="px-2 py-0.5 bg-gray-200 text-gray-600 rounded text-xs"
-                          >
-                            #{tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-                <div className="flex justify-center">
-                  <button
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-base"
-                    onClick={() => {
-                      setPage(page + 1);
-                      handleOpenStudySetsModal(
-                        showStudySetsModal.category!,
-                        page
-                      );
-                    }}
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="text-gray-500 text-center py-8">
-                No study sets in this category.
-              </div>
-            )}
-            {showStudySetsModal.category && (
-              <button
-                className="mt-2 w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold text-base"
-                onClick={() =>
-                  openCreateStudySetModal(showStudySetsModal.category!.id)
-                }
-              >
-                + Create Study Set
-              </button>
-            )}
-          </div>
-        </div>
+        <CategoryStudySetsModal
+          open={showStudySetsModal.open}
+          category={showStudySetsModal.category}
+          studySets={modalStudySets.data}
+          loading={modalStudySets.loading}
+          onClose={handleCloseStudySetsModal}
+          onViewStudySet={id => navigate(`/study-sets/${id}`)}
+          onCreateStudySet={openCreateStudySetModal}
+        />
       )}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">

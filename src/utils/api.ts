@@ -75,6 +75,7 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return api(originalRequest);
       } catch (err) {
+        console.log(err);
         processQueue(err, null);
         return Promise.reject(err);
       } finally {
