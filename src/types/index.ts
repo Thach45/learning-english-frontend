@@ -7,8 +7,25 @@ export interface Vocabulary {
   example: string;
   imageUrl?: string;
   audioUrl?: string;
-  studySetId: string;
-  createdAt: Date;
+  
+}
+export interface ReviewVocabulary extends Vocabulary {
+  status: 'review' | 'learned' | 'mastered';
+  nextReviewAt: Date;
+  reviewCount: number;
+  correctCount: number;
+  level: 'beginner' | 'intermediate' | 'advanced';
+  incorrectCount: number;
+}
+export interface LearnVocabulary extends Vocabulary {
+  isLearned: boolean;
+  isFavorite: boolean;
+  isNew: boolean;
+  isReview: boolean;
+  isReviewing: boolean;
+  level: 'beginner' | 'intermediate' | 'advanced';
+  category: string;
+  tags: string[];
 }
 
 export interface StudySet {

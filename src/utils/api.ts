@@ -87,4 +87,20 @@ api.interceptors.response.use(
   },
 );
 
-export default api; 
+export default api;
+
+// --- Custom API for learning ---
+
+export async function fetchStudySetVocabulary(studySetId: string): Promise<any[]> {
+  const res = await api.get(`/learning/study-sets/${studySetId}/vocabulary`);
+  // Nếu backend trả về { data: [...] }
+  if (res.data && Array.isArray(res.data.data)) return res.data.data;
+  // Nếu backend trả về mảng luôn
+  if (Array.isArray(res.data)) return res.data;
+  return [];
+}
+
+export async function updateVocabularyProgress(vocabId: string, result: 'easy' | 'good' | 'hard'): Promise<any> {
+  const res = await api.patch(`/learning/vocabulary/${vocabId}/progress`, { result });
+  return res.data;
+} 

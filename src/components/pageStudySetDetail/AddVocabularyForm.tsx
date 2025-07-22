@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lightbulb, BookOpen as BookOpenIcon, PlusCircle } from 'lucide-react';
+import { Lightbulb, BookOpen as BookOpenIcon, PlusCircle, Speaker } from 'lucide-react';
 import { AddVocabulary } from '../../types';
 
 interface AddVocabularyFormProps {
@@ -25,8 +25,16 @@ const AddVocabularyForm: React.FC<AddVocabularyFormProps> = ({
   onSubmit,
   definitionMap,
 }) => {
+  const [audioError, setAudioError] = React.useState('');
+  const handlePlayAudio = () => {
+    if (!newVocab.audioUrl) return;
+    const audio = new Audio(newVocab.audioUrl);
+    audio.onerror = () => setAudioError('Không phát được audio. Đường dẫn không hợp lệ hoặc file không tồn tại.');
+    audio.onplay = () => setAudioError('');
+    audio.play();
+  };
   return (
-    <div className="space-y-5">
+    <div className="space-y-1">
       <div className="flex items-center gap-2 mb-2">
         <BookOpenIcon className="w-5 h-5 text-blue-500" />
         <span className="text-lg font-semibold text-gray-800">Add a new vocabulary</span>
@@ -126,6 +134,23 @@ const AddVocabularyForm: React.FC<AddVocabularyFormProps> = ({
           value={newVocab.imageUrl}
           onChange={e => setNewVocab(v => ({ ...v, imageUrl: e.target.value }))}
         />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Audio (URL)</label>
+        <div className="flex items-center gap-2">
+          <input
+            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="https://..."
+            value={newVocab.audioUrl}
+            onChange={e => setNewVocab(v => ({ ...v, audioUrl: e.target.value }))}
+          />
+          {newVocab.audioUrl && (
+            <button type="button" onClick={handlePlayAudio} className="p-2 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-600">
+              <Speaker className="w-5 h-5" />
+            </button>
+          )}
+        </div>
+        {audioError && <div className="text-xs text-red-500 mt-1">{audioError}</div>}
       </div>
       <button
         className="mt-6 w-full py-3 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-lg shadow-lg transition disabled:opacity-60"

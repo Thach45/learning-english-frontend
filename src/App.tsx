@@ -34,9 +34,7 @@ function App() {
               <Route path="/study-sets" element={<StudySets />} />
               {/* <Route path="/study-sets/create" element={<CreateStudySet />} /> */}
               <Route path="/study-sets/:id" element={<StudySetDetail />} />
-              <Route path="/learn" element={<Learn />} />
-              <Route path="/learn/flashcards" element={<Learn />} />
-              <Route path="/learn/quiz" element={<Learn />} />
+              <Route path="/learn/:studySetId/flashcards" element={<Learn />} />
               <Route path="/achievements" element={<Achievements />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/categories" element={<Categories />} />

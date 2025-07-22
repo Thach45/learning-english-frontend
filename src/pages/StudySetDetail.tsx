@@ -54,7 +54,7 @@ const StudySetDetail: React.FC = () => {
   }, [id, navigate]);
 
   const handleStartFlashcards = () => {
-    navigate(`/learn/flashcards?studySetId=${id}`);
+    navigate(`/learn/${id}/flashcards`);
   };
 
   const handleStartQuiz = () => {
@@ -485,7 +485,7 @@ const StudySetDetail: React.FC = () => {
               >
                 <X className="w-5 h-5" />
               </button>
-              <h3 className="text-xl font-bold mb-4">Add new vocabulary</h3>
+ 
               <AddVocabularyForm
                 newVocab={newVocab}
                 setNewVocab={setNewVocab}
