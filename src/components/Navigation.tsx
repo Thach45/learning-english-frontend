@@ -42,7 +42,7 @@ const UserMenu = () => {
         <div className="relative">
             <button onClick={() => setIsOpen(!isOpen)} className="flex items-center space-x-2">
                 <img
-                    src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}&background=random`}
+                    src={user.avatarUrl || `https://ui-avatars.com/api/?name=${user.name}&background=random`}
                     alt={user.name}
                     className="h-8 w-8 rounded-full"
                 />
@@ -156,7 +156,7 @@ const Navigation: React.FC = () => {
               {user && ( // Show user info if logged in
                 <div className="flex items-center px-3 py-2 space-x-2 border-b mb-2">
                     <img
-                        src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}&background=random`}
+                        src={user.avatarUrl || `https://ui-avatars.com/api/?name=${user.name}&background=random`}
                         alt={user.name}
                         className="h-10 w-10 rounded-full"
                     />

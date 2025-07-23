@@ -93,10 +93,9 @@ export default api;
 
 export async function fetchStudySetVocabulary(studySetId: string): Promise<any[]> {
   const res = await api.get(`/learning/study-sets/${studySetId}/vocabulary`);
-  // Nếu backend trả về { data: [...] }
-  if (res.data && Array.isArray(res.data.data)) return res.data.data;
+  if (res.data && Array.isArray(res.data.data.data)) return res.data.data.data;
   // Nếu backend trả về mảng luôn
-  if (Array.isArray(res.data)) return res.data;
+  if (Array.isArray(res.data.data)) return res.data.data;
   return [];
 }
 

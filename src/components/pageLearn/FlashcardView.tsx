@@ -5,7 +5,7 @@ import { ReviewVocabulary } from '../../types';
 interface FlashcardProps {
   vocabulary: ReviewVocabulary;
   onNext: () => void;
-  onResult: (result: 'correct' | 'incorrect' | 'partial') => void;
+  onResult: (result: 'easy' | 'good' | 'hard') => void;
   showResult?: boolean;
   currentIndex?: number;
   totalCards?: number;
@@ -47,9 +47,9 @@ const Flashcard: React.FC<FlashcardProps> = ({
       setIsAnimating(false);
       
       const resultMap = {
-        'easy': 'correct' as const,
-        'medium': 'partial' as const,
-        'hard': 'incorrect' as const
+        'easy': 'easy' as const,
+        'medium': 'good' as const,
+        'hard': 'hard' as const
       };
       
       onResult(resultMap[difficulty]);
@@ -147,7 +147,7 @@ const Flashcard: React.FC<FlashcardProps> = ({
           >
             <div className="bg-white rounded-2xl shadow-card hover:shadow-card-hover border border-gray-200 p-8 min-h-96 transition-shadow duration-300">
               <div className="flex flex-col items-center justify-center h-full text-center">
-                {vocabulary.imageUrl && (
+                {vocabulary?.imageUrl && (
                   <div className="mb-6">
                     <img
                       src={vocabulary.imageUrl}

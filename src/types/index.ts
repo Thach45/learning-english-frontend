@@ -9,13 +9,23 @@ export interface Vocabulary {
   audioUrl?: string;
   
 }
-export interface ReviewVocabulary extends Vocabulary {
-  status: 'review' | 'learned' | 'mastered';
-  nextReviewAt: Date;
+export interface ReviewVocabulary {
+  vocabularyId: string;
+  word: string;
+  meaning: string;
+  definition?: string;
+  example?: string;
+  imageUrl?: string;
+  audioUrl?: string;
+  pronunciation?: string;
+  level: 'beginner' | 'intermediate' | 'advanced';
+  status: string;
+  nextReviewAt?: string;
   reviewCount: number;
   correctCount: number;
-  level: 'beginner' | 'intermediate' | 'advanced';
   incorrectCount: number;
+  easeFactor: number;
+  interval: number;
 }
 export interface LearnVocabulary extends Vocabulary {
   isLearned: boolean;

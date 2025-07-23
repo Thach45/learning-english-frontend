@@ -1,26 +1,48 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import Flashcard from '../components/pageLearn/FlashcardView';
-import mockReviewVocabulary from '../data/mockReviewVocabulary';
+
 import { ReviewVocabulary } from '../types';
+import { fetchStudySetVocabulary, updateVocabularyProgress } from '../utils/api';
+import { useParams } from 'react-router-dom';
 
 const Learn: React.FC = () => {
   const [mode, setMode] = useState<'select' | 'flashcard'>('flashcard');
   // Ép kiểu cho mockReviewVocabulary nếu cần
-  const [vocabularyList, setVocabularyList] = useState<ReviewVocabulary[]>(mockReviewVocabulary as ReviewVocabulary[]);
+  const [vocabularyList, setVocabularyList] = useState<ReviewVocabulary[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const [sessionStats, setSessionStats] = useState({
     learned: 0,
     reviewed: 0,
     correct: 0,
     total: 0
   });
-
-  const handleFlashcardResult = (result: 'correct' | 'incorrect' | 'partial') => {
+  // learning/study-sets/:id/vocabulary
+  const { studySetId } = useParams<{ studySetId: string }>();
+  
+  useEffect(() => {
+    const fetchVocabularyList = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetchStudySetVocabulary(studySetId || '');
+        console.log(response);
+        const data = response;
+        setVocabularyList(data);
+      } catch (error) {
+        console.error('Error fetching vocabulary:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchVocabularyList();
+  }, []);
+  const handleFlashcardResult = (result: 'easy' | 'good' | 'hard') => {
+    updateVocabularyProgress(vocabularyList[currentIndex].vocabularyId, result);
     setSessionStats(prev => ({
       ...prev,
       reviewed: prev.reviewed + 1,
-      correct: result === 'correct' ? prev.correct + 1 : prev.correct,
+      correct: result === 'easy' ? prev.correct + 1 : prev.correct,
       total: prev.total + 1
     }));
   };
@@ -34,6 +56,17 @@ const Learn: React.FC = () => {
       alert(`Session Complete!\nCorrect: ${sessionStats.correct + sessionStats.learned}\nTotal: ${sessionStats.total}`);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading vocabulary...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (mode === 'flashcard') {
     return (
