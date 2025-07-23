@@ -284,7 +284,7 @@ const StudySetDetail: React.FC = () => {
       {/* Top Section - Learning Stats */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <button
             onClick={() => navigate('/study-sets')}
             className="flex items-center text-gray-600 hover:text-gray-900"
@@ -293,28 +293,30 @@ const StudySetDetail: React.FC = () => {
             Back to Study Sets
           </button>
           
-          <div className="flex space-x-2">
-            <button
-              onClick={handleShare}
-              className="flex items-center px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm"
-            >
-              <Share2 className="h-4 w-4 mr-2" />
-              Share
-            </button>
-          </div>
+          
         </div>
-
         {/* Study Set Info */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-7 mb-8">
           <div className="flex items-start justify-between mb-6">
-           
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{studySet.title}
-              </h1>
+              <div className="flex items-center justify-between mb-3">
+                <h1 className="text-3xl">{studySet.title}</h1>
+                <div className="flex items-center space-x-3">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleShare}
+                    className="flex items-center px-4 py-2 text-gray-700 rounded-lg transition-all duration-200"
+                  >
+                    <Share2 className="h-4 w-4 mr-2" />    
+                  </motion.button>
+                 
+                </div>
+              </div>
               
               <p className="text-gray-600 text-lg mb-4">{studySet.description}</p>
               
-              <div className="flex items-center space-x-4 mb-4">
+              <div className="flex flex-wrap items-center gap-4 mb-4">
                 <div className="flex items-center text-sm text-gray-600">
                   <BookOpen className="h-4 w-4 mr-1" />
                   {vocabularies.length} terms
@@ -327,11 +329,21 @@ const StudySetDetail: React.FC = () => {
                 
                 <div className="flex items-center text-sm text-gray-600">
                   <Calendar className="h-4 w-4 mr-1" />
-                  Updated {studySet.updatedAt.toLocaleString()}
+                  Updated {new Date(studySet.updatedAt).toLocaleDateString()}
                 </div>
-              </div>
 
-              <div className="flex items-center space-x-2">
+                {studySet.isPublic ? (
+                  <div className="flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                    <Globe className="h-3 w-3 mr-1" />
+                    Public
+                  </div>
+                ) : (
+                  <div className="flex items-center px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">
+                    <Lock className="h-3 w-3 mr-1" />
+                    Private
+                  </div>
+                )}
+
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                   studySet.level === 'beginner' ? 'bg-green-100 text-green-800' :
                   studySet.level === 'intermediate' ? 'bg-yellow-100 text-yellow-800' :
@@ -340,31 +352,17 @@ const StudySetDetail: React.FC = () => {
                   {studySet.level}
                 </span>
                 
-                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
                   {studySet.category.name}
                 </span>
-
-                <div className="flex items-center">
-                  {studySet.isPublic ? (
-                    <div className="flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                      <Globe className="h-3 w-3 mr-1" />
-                      Public
-                    </div>
-                  ) : (
-                    <div className="flex items-center px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">
-                      <Lock className="h-3 w-3 mr-1" />
-                      Private
-                    </div>
-                  )}
-                </div>
               </div>
 
               {studySet.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-4">
+                <div className="flex flex-wrap gap-2">
                   {studySet.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-sm"
+                      className="px-2 py-1 bg-gray-100 text-gray-600 rounded-lg text-sm hover:bg-gray-200 transition-colors cursor-pointer"
                     >
                       #{tag}
                     </span>
