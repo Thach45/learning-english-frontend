@@ -139,3 +139,11 @@ export interface AddVocabulary {
 export interface UpdateVocabulary extends AddVocabulary {
   id: string;
 }
+
+export interface StudySetStats {
+  total: number;
+  learned: number;
+  needReview: number;
+  mastered: number;
+  allReview: number;
+}

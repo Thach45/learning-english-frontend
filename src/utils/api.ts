@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { StudySetStats } from '../types';
 
 const api = axios.create({
   baseURL: '/api',
@@ -91,8 +92,16 @@ export default api;
 
 // --- Custom API for learning ---
 
-export async function fetchStudySetVocabulary(studySetId: string): Promise<any[]> {
-  const res = await api.get(`/learning/study-sets/${studySetId}/vocabulary`);
+export async function fetchStudySetStats(studySetId: string): Promise<StudySetStats> {
+  const res = await api.get(`/learning/study-sets/${studySetId}/stats`);
+  return res.data.data.data;
+}
+
+export async function fetchStudySetVocabulary(studySetId: string, mode: 'practice' | 'review' = 'practice'): Promise<any[]> {
+  const res = await api.get(`/learning/study-sets/${studySetId}/vocabulary`, {
+    params: { mode }
+  });
+  console.log("res", res);
   if (res.data && Array.isArray(res.data.data.data)) return res.data.data.data;
   // Nếu backend trả về mảng luôn
   if (Array.isArray(res.data.data)) return res.data.data;

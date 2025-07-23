@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BookOpen } from "lucide-react";
+import { motion } from 'framer-motion';
+
 
 interface CategoryStudySetsModalProps {
   open: boolean;
@@ -11,6 +13,28 @@ interface CategoryStudySetsModalProps {
   onCreateStudySet: (categoryId: string) => void;
 }
 
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: "easeOut"
+    }
+  }
+};
+
 const CategoryStudySetsModal: React.FC<CategoryStudySetsModalProps> = ({
   open,
   category,
@@ -20,14 +44,10 @@ const CategoryStudySetsModal: React.FC<CategoryStudySetsModalProps> = ({
   onViewStudySet,
   onCreateStudySet,
 }) => {
-  const [visibleCount, setVisibleCount] = useState(4);
-  useEffect(() => {
-    if (open) setVisibleCount(4);
-  }, [open]);
   if (!open || !category) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md relative max-h-[80vh]">
+      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md relative ">
         <button
           className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
           onClick={onClose}
@@ -42,10 +62,23 @@ const CategoryStudySetsModal: React.FC<CategoryStudySetsModalProps> = ({
             Loading study sets...
           </div>
         ) : studySets.length ? (
-          <div className="space-y-4 mb-4 max-h-[50vh] overflow-y-auto">
-            {studySets.slice(0, visibleCount).map((ss) => (
-              <div
+          <motion.div 
+            className="space-y-4 mb-4 max-h-[50vh] overflow-y-auto"
+            variants={container}
+            initial="hidden"
+            animate="show"
+          >          
+            {studySets.map((ss, index) => (
+              <motion.div
                 key={ss.id}
+                variants={item as any}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true }}
+                whileHover={{ 
+                  scale: 1.02,
+                  transition: { duration: 0.2 }
+                }}
                 className="border border-gray-200 rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition flex flex-col cursor-pointer"
                 onClick={() => {
                   onClose();
@@ -53,10 +86,15 @@ const CategoryStudySetsModal: React.FC<CategoryStudySetsModalProps> = ({
                 }}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-lg font-bold text-blue-800 line-clamp-1">
+                  <motion.span 
+                    className="text-lg font-bold text-blue-800 line-clamp-1"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
                     {ss.title}
-                  </span>
-                  <span
+                  </motion.span>
+                  <motion.span
                     className={`px-2 py-0.5 rounded text-xs font-semibold ml-2 ${
                       ss.level === "BEGINNER"
                         ? "bg-green-100 text-green-700"
@@ -64,61 +102,90 @@ const CategoryStudySetsModal: React.FC<CategoryStudySetsModalProps> = ({
                         ? "bg-yellow-100 text-yellow-700"
                         : "bg-red-100 text-red-700"
                     }`}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: index * 0.1 + 0.2 }}
                   >
                     {ss.level}
-                  </span>
+                  </motion.span>
                   {ss.isPublic ? (
-                    <span className="ml-2 px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-xs font-medium">
+                    <motion.span 
+                      className="ml-2 px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-xs font-medium"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 + 0.3 }}
+                    >
                       Public
-                    </span>
+                    </motion.span>
                   ) : (
-                    <span className="ml-2 px-2 py-0.5 rounded bg-gray-200 text-gray-600 text-xs font-medium">
+                    <motion.span 
+                      className="ml-2 px-2 py-0.5 rounded bg-gray-200 text-gray-600 text-xs font-medium"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 + 0.3 }}
+                    >
                       Private
-                    </span>
+                    </motion.span>
                   )}
                 </div>
-                <div className="flex items-center text-sm text-gray-600 mb-1 space-x-4">
+                <motion.div 
+                  className="flex items-center text-sm text-gray-600 mb-1 space-x-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: index * 0.1 + 0.4 }}
+                >
                   <span className="flex items-center">
                     <BookOpen className="w-4 h-4 mr-1" />
                     {ss.vocabularyCount} terms
                   </span>
                   <span className="flex items-center">
                     <span className="mr-1">{ss.likesCount}</span>
-                    <span role="img" aria-label="likes">
+                    <motion.span 
+                      role="img" 
+                      aria-label="likes"
+                      animate={{ 
+                        scale: [1, 1.2, 1],
+                        rotate: [0, 10, -10, 0]
+                      }}
+                      transition={{ 
+                        duration: 0.5,
+                        repeat: Infinity,
+                        repeatDelay: 2
+                      }}
+                    >
                       ❤️
-                    </span>
+                    </motion.span>
                   </span>
                   <span className="text-xs text-gray-400">
                     {ss.createdAt
                       ? new Date(ss.createdAt).toLocaleDateString()
                       : ""}
                   </span>
-                </div>
+                </motion.div>
                 {ss.tags && ss.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-1">
+                  <motion.div 
+                    className="flex flex-wrap gap-1 mt-1"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: index * 0.1 + 0.5 }}
+                  >
                     {ss.tags.map((tag: string, idx: number) => (
-                      <span
+                      <motion.span
                         key={idx}
                         className="px-2 py-0.5 bg-gray-200 text-gray-600 rounded text-xs"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: (index * 0.1 + 0.6) + (idx * 0.05) }}
                       >
                         #{tag}
-                      </span>
+                      </motion.span>
                     ))}
-                  </div>
+                  </motion.div>
                 )}
-              </div>
+              </motion.div>
             ))}
-            {visibleCount < studySets.length && (
-              <div className="flex justify-center">
-                <button
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-base"
-                  onClick={() => setVisibleCount(visibleCount + 4)}
-                >
-                  Xem thêm
-                </button>
-              </div>
-            )}
-          </div>
+         
+          </motion.div>
         ) : (
           <div className="text-gray-500 text-center py-8">
             No study sets in this category.

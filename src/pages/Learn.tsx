@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Book, Clock, RotateCcw } from 'lucide-react';
 import Flashcard from '../components/pageLearn/FlashcardView';
-
 import { ReviewVocabulary } from '../types';
 import { fetchStudySetVocabulary, updateVocabularyProgress } from '../utils/api';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 
 const Learn: React.FC = () => {
   const [mode, setMode] = useState<'select' | 'flashcard'>('flashcard');
-  // Ép kiểu cho mockReviewVocabulary nếu cần
   const [vocabularyList, setVocabularyList] = useState<ReviewVocabulary[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -18,17 +16,18 @@ const Learn: React.FC = () => {
     correct: 0,
     total: 0
   });
-  // learning/study-sets/:id/vocabulary
+  
   const { studySetId } = useParams<{ studySetId: string }>();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const studyMode = searchParams.get('mode') as 'practice' | 'review' || 'practice';
   
   useEffect(() => {
     const fetchVocabularyList = async () => {
       try {
         setIsLoading(true);
-        const response = await fetchStudySetVocabulary(studySetId || '');
-        console.log(response);
-        const data = response;
-        setVocabularyList(data);
+        const response = await fetchStudySetVocabulary(studySetId || '', studyMode);
+        setVocabularyList(response);
       } catch (error) {
         console.error('Error fetching vocabulary:', error);
       } finally {
@@ -36,9 +35,13 @@ const Learn: React.FC = () => {
       }
     };
     fetchVocabularyList();
-  }, []);
+  }, [studyMode, studySetId]);
+
   const handleFlashcardResult = (result: 'easy' | 'good' | 'hard') => {
-    updateVocabularyProgress(vocabularyList[currentIndex].vocabularyId, result);
+    if(studyMode === 'practice') {
+      updateVocabularyProgress(vocabularyList[currentIndex].vocabularyId, result);
+    }
+
     setSessionStats(prev => ({
       ...prev,
       reviewed: prev.reviewed + 1,
@@ -53,7 +56,7 @@ const Learn: React.FC = () => {
     } else {
       setMode('select');
       setCurrentIndex(0);
-      alert(`Session Complete!\nCorrect: ${sessionStats.correct + sessionStats.learned}\nTotal: ${sessionStats.total}`);
+      navigate(`/study-sets/${studySetId}`);
     }
   };
 
@@ -74,14 +77,16 @@ const Learn: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <button
-              onClick={() => setMode('select')}
+              onClick={() => navigate(`/study-sets/${studySetId}`)}
               className="flex items-center text-gray-600 hover:text-gray-900"
             >
               <ArrowLeft className="h-5 w-5 mr-2" />
-              Back to Learning
+              Back to Study Set
             </button>
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-900">Flashcard Mode</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {studyMode === 'practice' ? 'Practice Mode' : 'Review Mode'}
+              </h1>
               <p className="text-gray-600">
                 Card {currentIndex + 1} of {vocabularyList.length}
               </p>
@@ -106,18 +111,9 @@ const Learn: React.FC = () => {
     );
   }
 
-  // Trang chọn chế độ học (có thể tuỳ chỉnh thêm)
-  return (
-    <div className="min-h-screen bg-gray-50 py-8 flex flex-col items-center justify-center">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Learning Center</h1>
-      <button
-        onClick={() => setMode('flashcard')}
-        className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xl shadow-lg"
-      >
-        Start Flashcards
-      </button>
-    </div>
-  );
+  // Redirect back to study set if in select mode
+  navigate(`/study-sets/${studySetId}`);
+  return null;
 };
 
 export default Learn;
