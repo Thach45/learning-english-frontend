@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Play, Brain, BookOpen, Share2, Users, Calendar, Globe, Lock, Star, X, Lightbulb, BookOpen as BookOpenIcon, PlusCircle, Speaker, Speech, RotateCcw, Search, List, Grid, ChevronLeft, ChevronRight, Edit, Trash } from 'lucide-react';
-import { AddVocabulary, StudySet, StudySetStats, UpdateVocabulary, Vocabulary } from '../types';
+import { AddVocabulary, StudySet, StudySetStats, UpdateVocabulary, Vocabulary, PartOfSpeech } from '../types';
 import api, { fetchStudySetStats } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import AddVocabularyForm from '../components/pageStudySetDetail/AddVocabularyForm';
 import { motion } from 'framer-motion';
+import VocabularyCard from '../components/pageStudySetDetail/VocabularyCard';
 
 
 const StudySetDetail: React.FC = () => {
@@ -24,7 +25,9 @@ const StudySetDetail: React.FC = () => {
     definition: '',
     example: '',
     imageUrl: '',
- 
+    audioUrl: '',
+    partOfSpeech: PartOfSpeech.OTHER,
+    alternativePartOfSpeech: []
   });
   const [editVocab, setEditVocab] = useState<UpdateVocabulary | null>(null);
   const [showEditVocabModal, setShowEditVocabModal] = useState(false);
@@ -82,9 +85,7 @@ const StudySetDetail: React.FC = () => {
     navigate(`/learn/quiz?studySetId=${id}`);
   };
 
-  const handleEdit = () => {
-    navigate(`/study-sets/${id}/edit`);
-  };
+
 
   const handleShare = () => {
     const shareUrl = `${window.location.origin}/study-sets/${id}`;
@@ -105,12 +106,12 @@ const StudySetDetail: React.FC = () => {
   const handleAddVocabulary = async () => {
     setAddLoading(true);
     try {
-      
-      const res = await api.post(`/study-sets/${id}/vocabularies`, newVocab);
+      const { alternativePartOfSpeech, alternativeMeanings, ...rest } = newVocab;
+      const res = await api.post(`/study-sets/${id}/vocabularies`, rest);
       
       setVocabularies((prev) => [...prev, res.data.data]);
       setShowAddVocabModal(false);
-      setNewVocab({ word: '', meaning: '', pronunciation: '', definition: '', example: '', imageUrl: '' });
+      setNewVocab({ word: '', meaning: '', pronunciation: '', definition: '', example: '', imageUrl: '', audioUrl: '', partOfSpeech: PartOfSpeech.OTHER, alternativePartOfSpeech: [] });
     } catch (error: any) {
       console.log(error);
       alert(error?.response?.data?.message || 'Thêm từ vựng thất bại.');
@@ -134,6 +135,9 @@ const StudySetDetail: React.FC = () => {
         definition: editVocab.definition,
         example: editVocab.example,
         imageUrl: editVocab.imageUrl,
+        audioUrl: editVocab.audioUrl,
+        partOfSpeech: editVocab.partOfSpeech || PartOfSpeech.OTHER,
+        alternativePartOfSpeech: editVocab.alternativePartOfSpeech || []
       }
       console.log("editVocab", updatedVocab);
       const res = await api.put(`/study-sets/${id}/vocabularies/${editVocab.id}`, updatedVocab);
@@ -161,53 +165,38 @@ const StudySetDetail: React.FC = () => {
   };
 
   // Sửa lại hàm tự động điền từ API
-  const handleAutoFillVocabulary = async () => {
+  const handleAutoFillVocabulary = async (partOfSpeech?: PartOfSpeech) => {
     if (!newVocab.word) return;
     try {
-      const res = await api.get(`/vocabulary?word=${encodeURIComponent(newVocab.word)}`);
-      const data = res.data.data || res.data;
-      // Xử lý definition dạng "noun: ...; verb: ..."
-      let posDefs: Record<string, string> = {};
-      let posList: string[] = [];
-      if (data.definition && data.definition.includes(':')) {
-        const parts = data.definition.split(';').map((s: string) => s.trim()).filter(Boolean);
-        parts.forEach((part: string) => {
-          const [pos, ...defArr] = part.split(':');
-          if (pos && defArr.length) {
-            posDefs[pos.trim()] = defArr.join(':').trim();
-            posList.push(pos.trim());
-          }
-        });
+      const queryParams = new URLSearchParams({
+        word: newVocab.word
+      });
+      
+      if (partOfSpeech) {
+        queryParams.append('partOfSpeech', partOfSpeech);
       }
-      if (posList.length > 1) {
-        setPartOfSpeechOptions(posList);
-        setDefinitionMap(posDefs);
-        setSelectedPartOfSpeech(posList[0]);
-        setNewVocab(v => ({
-          ...v,
-          meaning: data.meaning || '',
-          pronunciation: data.pronunciation || '',
-          definition: posDefs[posList[0]] || '',
-          example: data.example || '',
-          audioUrl: data.audioUrl || '',
-        }));
+
+      const res = await api.get(`/vocabulary?${queryParams.toString()}`);
+      const data = res.data.data || res.data;
+      
+      setNewVocab(v => ({
+        ...v,
+        meaning: data.meaning || '',
+        pronunciation: data.pronunciation || '',
+        definition: data.definition || '',
+        example: data.example || '',
+        audioUrl: data.audioUrl || '',
+        cefrLevel: data.cefrLevel || '',
+        partOfSpeech: data.partOfSpeech || PartOfSpeech.OTHER,
+        alternativePartOfSpeech: data.alternativePartOfSpeech || []
+      }));
+
+      if (data.partOfSpeech) {
         setNotificationMessage(
-          `Từ "${newVocab.word}" có nhiều dạng từ: ${posList.join(', ')}. Vui lòng chọn đúng loại từ!`
+          `Từ "${newVocab.word}" được xác định là ${data.partOfSpeech.toLowerCase()}`
         );
         setShowNotification(true);
         setTimeout(() => setShowNotification(false), 3000);
-      } else {
-        setPartOfSpeechOptions([]);
-        setDefinitionMap({});
-        setSelectedPartOfSpeech('');
-        setNewVocab(v => ({
-          ...v,
-          meaning: data.meaning || '',
-          pronunciation: data.pronunciation || '',
-          definition: data.definition || '',
-          example: data.example || '',
-          audioUrl: data.audioUrl || '',
-        }));
       }
     } catch (err) {
       setNotificationMessage('Không lấy được gợi ý tự động!');
@@ -575,97 +564,19 @@ const StudySetDetail: React.FC = () => {
                 className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-4'}
               >
                 {paginatedVocabularies.map((vocab, index) => (
-                  <motion.div
+                  <VocabularyCard
                     key={vocab.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                    className={`
-                      border border-gray-200 rounded-lg p-4 
-                      ${viewMode === 'grid' ? 'h-full' : ''}
-                      hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm
-                      transition-all duration-200
-                    `}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-4 mb-2">
-                          <span className="text-sm font-medium text-gray-500">
-                            #{(currentPage - 1) * itemsPerPage + index + 1}
-                          </span>
-                          <h3 className="text-lg font-bold text-gray-900">{vocab.word}</h3>
-                          {vocab.pronunciation && (
-                            <span className="text-sm text-gray-600 font-mono">{vocab.pronunciation}</span>
-                          )}
-                          {vocab.audioUrl && (
-                            <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              className="text-blue-500 hover:text-blue-600"
-                              onClick={() => handlePlayAudio(vocab.audioUrl || '')}
-                            >
-                              <Speech className="w-4 h-4" />
-                            </motion.button>
-                          )}
-                        </div>
-                        
-                        <div className="grid md:grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-sm font-medium text-gray-700 mb-1">Vietnamese:</p>
-                            <p className="text-blue-600 font-medium">{vocab.meaning}</p>
-                          </div>
-                          
-                          <div>
-                            <p className="text-sm font-medium text-gray-700 mb-1">Definition:</p>
-                            <p className="text-gray-600">{vocab.definition}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="mt-3">
-                          <p className="text-sm font-medium text-gray-700 mb-1">Example:</p>
-                          <p className="text-gray-600 italic">"{vocab.example}"</p>
-                        </div>
-                      </div>
-                      
-                      {vocab.imageUrl && (
-                        <motion.img
-                          src={vocab.imageUrl}
-                          alt={vocab.word}
-                          className="w-16 h-16 object-cover rounded-lg ml-4"
-                          whileHover={{ scale: 1.1 }}
-                        />
-                      )}
-                    </div>
-
-                    {isOwner && (
-                      <motion.div 
-                        className="flex justify-end mt-4 space-x-2"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                      >
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-600"
-                          onClick={() => handleEditVocab(vocab)}
-                        >
-                          <Edit className="w-4 h-4 inline mr-1" />
-                          Edit
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="px-3 py-1.5 bg-red-100 hover:bg-red-200 rounded-lg text-sm font-medium text-red-600 disabled:opacity-60"
-                          onClick={() => setDeleteConfirmVocab(vocab)}
-                          disabled={deleteLoadingId === vocab.id}
-                        >
-                          <Trash className="w-4 h-4 inline mr-1" />
-                          {deleteLoadingId === vocab.id ? 'Deleting...' : 'Delete'}
-                        </motion.button>
-                      </motion.div>
-                    )}
-                  </motion.div>
+                    vocab={vocab}
+                    index={index}
+                    currentPage={currentPage}
+                    itemsPerPage={itemsPerPage}
+                    viewMode={viewMode}
+                    isOwner={isOwner}
+                    deleteLoadingId={deleteLoadingId}
+                    onEdit={handleEditVocab}
+                    onDelete={setDeleteConfirmVocab}
+                    onPlayAudio={handlePlayAudio}
+                  />
                 ))}
               </motion.div>
             ) : (
@@ -752,33 +663,31 @@ const StudySetDetail: React.FC = () => {
 
       {/* Add Vocabulary Modal */}
       {showAddVocabModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-lg relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl relative">
             {/* Notification UI */}
             {showNotification && (
-              <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-blue-100 border border-blue-300 text-blue-800 px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-fade-in z-50">
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-blue-100 border border-blue-300 text-blue-800 px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-fade-in z-50">
                 <Lightbulb className="w-5 h-5 text-blue-500" />
                 <span className="font-medium">{notificationMessage}</span>
               </div>
             )}
             <button
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
               onClick={() => setShowAddVocabModal(false)}
             >
-              <X className="w-5 h-5" />
+              <X className="w-6 h-6" />
             </button>
-     
-            <AddVocabularyForm
-              newVocab={newVocab}
-              setNewVocab={setNewVocab}
-              partOfSpeechOptions={partOfSpeechOptions}
-              selectedPartOfSpeech={selectedPartOfSpeech}
-              setSelectedPartOfSpeech={setSelectedPartOfSpeech}
-              handleAutoFillVocabulary={handleAutoFillVocabulary}
-              addLoading={addLoading}
-              onSubmit={handleAddVocabulary}
-              definitionMap={definitionMap}
-            />
+
+            <div className="p-8">
+              <AddVocabularyForm
+                newVocab={newVocab}
+                setNewVocab={setNewVocab}
+                handleAutoFillVocabulary={handleAutoFillVocabulary}
+                addLoading={addLoading}
+                onSubmit={handleAddVocabulary}
+              />
+            </div>
           </div>
         </div>
       )}
@@ -815,6 +724,33 @@ const StudySetDetail: React.FC = () => {
                 value={editVocab.pronunciation}
                 onChange={e => setEditVocab(v => v ? { ...v, pronunciation: e.target.value } : v)}
               />
+              <div className="relative">
+                <select
+                  className="w-full border rounded pl-9 pr-3 py-2 appearance-none bg-white"
+                  value={editVocab.cefrLevel || ''}
+                  onChange={e => setEditVocab(v => v ? { ...v, cefrLevel: e.target.value } : v)}
+                >
+                  <option value="">Select CEFR level</option>
+                  <option value="A1" className="text-green-700">A1 - Beginner</option>
+                  <option value="A2" className="text-emerald-700">A2 - Elementary</option>
+                  <option value="B1" className="text-blue-700">B1 - Intermediate</option>
+                  <option value="B2" className="text-indigo-700">B2 - Upper Intermediate</option>
+                  <option value="C1" className="text-purple-700">C1 - Advanced</option>
+                  <option value="C2" className="text-pink-700">C2 - Mastery</option>
+                </select>
+                <Star className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+                  editVocab.cefrLevel ? 'text-yellow-500' : 'text-gray-400'
+                }`} />
+              </div>
+              <select
+                className="w-full border rounded px-3 py-2"
+                value={editVocab.partOfSpeech || PartOfSpeech.OTHER}
+                onChange={e => setEditVocab(v => v ? { ...v, partOfSpeech: e.target.value as PartOfSpeech } : v)}
+              >
+                {Object.values(PartOfSpeech).map(pos => (
+                  <option key={pos} value={pos}>{pos.toLowerCase()}</option>
+                ))}
+              </select>
               <input
                 className="w-full border rounded px-3 py-2"
                 placeholder="Definition"
@@ -832,6 +768,12 @@ const StudySetDetail: React.FC = () => {
                 placeholder="Image (URL)"
                 value={editVocab.imageUrl}
                 onChange={e => setEditVocab(v => v ? { ...v, imageUrl: e.target.value } : v)}
+              />
+              <input
+                className="w-full border rounded px-3 py-2"
+                placeholder="Audio (URL)"
+                value={editVocab.audioUrl}
+                onChange={e => setEditVocab(v => v ? { ...v, audioUrl: e.target.value } : v)}
               />
             </div>
             <button

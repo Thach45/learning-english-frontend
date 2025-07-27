@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Volume2, RotateCcw, Eye, EyeOff, Star, ArrowRight } from 'lucide-react';
+import { Volume2, RotateCcw, Eye, EyeOff, Star, ArrowRight, BookOpen, Tag } from 'lucide-react';
 import { ReviewVocabulary } from '../../types';
 
 interface FlashcardProps {
@@ -25,7 +25,7 @@ const Flashcard: React.FC<FlashcardProps> = ({
   const [showResultFeedback, setShowResultFeedback] = useState(false);
   const [selectedDifficulty, setSelectedDifficulty] = useState<'easy' | 'medium' | 'hard' | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
-  
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
@@ -34,7 +34,16 @@ const Flashcard: React.FC<FlashcardProps> = ({
     }
   };
 
- 
+  const handlePlayAudio = () => {
+    if (!vocabulary.audioUrl) return;
+    
+    setIsPlayingAudio(true);
+    const audio = new Audio(vocabulary.audioUrl);
+    audio.onended = () => setIsPlayingAudio(false);
+    audio.onerror = () => setIsPlayingAudio(false);
+    audio.play();
+  };
+
   const handleDifficultySelect = (difficulty: 'easy' | 'medium' | 'hard') => {
     if (isAnimating) return;
     
@@ -68,6 +77,7 @@ const Flashcard: React.FC<FlashcardProps> = ({
     setShowResultFeedback(false);
     setSelectedDifficulty(null);
     setIsAnimating(false);
+    setIsPlayingAudio(false);
     onNext();
   };
 
@@ -102,6 +112,18 @@ const Flashcard: React.FC<FlashcardProps> = ({
       }
     };
     return configs[difficulty];
+  };
+
+  const getCefrColor = (level?: string) => {
+    switch (level?.toUpperCase()) {
+      case 'A1': return 'bg-green-100 text-green-800 border-green-200';
+      case 'A2': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      case 'B1': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'B2': return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+      case 'C1': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'C2': return 'bg-pink-100 text-pink-800 border-pink-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
   };
 
   return (
@@ -147,6 +169,7 @@ const Flashcard: React.FC<FlashcardProps> = ({
           >
             <div className="bg-white rounded-2xl shadow-card hover:shadow-card-hover border border-gray-200 p-8 min-h-96 transition-shadow duration-300">
               <div className="flex flex-col items-center justify-center h-full text-center">
+                {/* Image Section */}
                 {vocabulary?.imageUrl && (
                   <div className="mb-6">
                     <img
@@ -157,35 +180,49 @@ const Flashcard: React.FC<FlashcardProps> = ({
                   </div>
                 )}
                 
+                {/* Word Section */}
                 <div className="mb-6">
                   <h2 className="text-5xl font-bold text-gray-900 mb-3">
                     {vocabulary.word}
                   </h2>
                   {vocabulary.pronunciation && (
-                    <p className="text-xl text-gray-600 font-mono">
+                    <p className="text-xl text-gray-600 font-mono mb-3">
                       {vocabulary.pronunciation}
                     </p>
                   )}
+                  
+                  {/* Part of Speech */}
+                  {vocabulary.partOfSpeech && (
+                    <div className="inline-flex items-center px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-medium border border-blue-200">
+                      <Tag className="w-4 h-4 mr-1.5" />
+                      {vocabulary.partOfSpeech.toLowerCase()}
+                    </div>
+                  )}
                 </div>
 
-                <button
-                 
-                  className="flex items-center justify-center w-16 h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-all duration-200 mb-8 disabled:opacity-50 shadow-lg hover-scale disabled:hover:scale-100"
-                >
-                  <Volume2 className={`h-7 w-7 ${true ? 'animate-pulse' : ''}`} />
-                </button>
+                {/* Audio Button */}
+                {vocabulary.audioUrl && (
+                  <button
+                    onClick={handlePlayAudio}
+                    disabled={isPlayingAudio}
+                    className="flex items-center justify-center w-16 h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-all duration-200 mb-8 disabled:opacity-50 shadow-lg hover-scale disabled:hover:scale-100"
+                  >
+                    <Volume2 className={`h-7 w-7 ${isPlayingAudio ? 'animate-pulse' : ''}`} />
+                  </button>
+                )}
 
+                {/* Level Tags */}
                 <div className="flex items-center space-x-3 mb-6">
-                  <span className={`px-4 py-2 rounded-full text-sm font-medium ${
-                    vocabulary.level === 'beginner' ? 'bg-green-100 text-green-800' :
-                    vocabulary.level === 'intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    {vocabulary.level}
-                  </span>
-                 
+                  
+                  {vocabulary.cefrLevel && (
+                    <div className={`flex items-center px-3 py-2 rounded-full text-sm font-medium border ${getCefrColor(vocabulary.cefrLevel)}`}>
+                      <Star className="w-4 h-4 mr-1.5" />
+                      CEFR {vocabulary.cefrLevel}
+                    </div>
+                  )}
                 </div>
 
+                {/* Flip Button */}
                 <button
                   onClick={handleFlip}
                   className="flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all duration-200 hover-scale"
@@ -214,39 +251,74 @@ const Flashcard: React.FC<FlashcardProps> = ({
                   <h3 className="text-3xl font-bold text-gray-900 mb-2">
                     {vocabulary.word}
                   </h3>
-                  <p className="text-2xl text-blue-600 font-semibold mb-4">
+                  <p className="text-2xl text-blue-600 font-semibold mb-2">
                     {vocabulary.meaning}
                   </p>
+                  
+                  {/* Pronunciation and Part of Speech */}
+                  <div className="flex justify-center items-center space-x-4 mb-3">
+                    {vocabulary.pronunciation && (
+                      <span className="text-lg text-gray-600 font-mono">
+                        {vocabulary.pronunciation}
+                      </span>
+                    )}
+                    {vocabulary.partOfSpeech && (
+                      <div className="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-sm font-medium">
+                        <Tag className="w-3 h-3 mr-1" />
+                        {vocabulary.partOfSpeech.toLowerCase()}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* CEFR Level */}
+                  {vocabulary.cefrLevel && (
+                    <div className="flex justify-center mt-2">
+                      <div className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium border ${getCefrColor(vocabulary.cefrLevel)}`}>
+                        <Star className="w-4 h-4 mr-1.5" />
+                        <span>CEFR Level: {vocabulary.cefrLevel}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 space-y-6">
-                  <div>
-                    <button
-                      onClick={() => setShowDefinition(!showDefinition)}
-                      className="flex items-center text-gray-700 hover:text-gray-900 font-medium mb-3 transition-colors duration-200"
-                    >
-                      {showDefinition ? <EyeOff className="h-5 w-5 mr-2" /> : <Eye className="h-5 w-5 mr-2" />}
-                      Definition
-                    </button>
-                    {showDefinition && (
-                      <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-blue-500">
-                        <p className="text-gray-700">{vocabulary.definition}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
-                      <Star className="h-5 w-5 mr-2 text-yellow-500" />
-                      Example:
-                    </h4>
-                    <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
-                      <p className="text-gray-700 italic text-lg">
-                        "{vocabulary.example}"
-                      </p>
+                  {/* Definition Section */}
+                  {vocabulary.definition && (
+                    <div>
+                      <button
+                        onClick={() => setShowDefinition(!showDefinition)}
+                        className="flex items-center text-gray-700 hover:text-gray-900 font-medium mb-3 transition-colors duration-200"
+                      >
+                        {showDefinition ? <EyeOff className="h-5 w-5 mr-2" /> : <Eye className="h-5 w-5 mr-2" />}
+                        Definition
+                      </button>
+                      {showDefinition && (
+                        <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-blue-500">
+                          <div 
+                            className="text-gray-700"
+                            dangerouslySetInnerHTML={{ __html: vocabulary.definition }}
+                          />
+                        </div>
+                      )}
                     </div>
-                  </div>
+                  )}
+
+                  {/* Example Section */}
+                  {vocabulary.example && (
+                    <div>
+                      <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+                        <BookOpen className="h-5 w-5 mr-2 text-blue-500" />
+                        Example:
+                      </h4>
+                      <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                        <div 
+                          className="text-gray-700 italic text-lg"
+                          dangerouslySetInnerHTML={{ __html: vocabulary.example }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Flip Back Button */}
@@ -264,6 +336,7 @@ const Flashcard: React.FC<FlashcardProps> = ({
           </div>
         </div>
       </div>
+
       {/* Difficulty Selection */}
       {isFlipped && !showResultFeedback && (
         <div className="fixed bottom-6 left-0 right-0 flex justify-center items-center z-10">
@@ -277,21 +350,19 @@ const Flashcard: React.FC<FlashcardProps> = ({
                 let animationClass = '';
                 if (isAnimating) {
                   if (isSelected) {
-                    // Determine animation direction based on position
-                    if (index === 0) { // Left button
+                    if (index === 0) {
                       animationClass = 'animate-slide-left-to-center scale-110';
-                    } else if (index === 2) { // Right button
+                    } else if (index === 2) {
                       animationClass = 'animate-slide-right-to-center scale-110';
-                    } else { // Middle button
+                    } else {
                       animationClass = 'scale-110 translate-y-0';
                     }
                   } else {
-                    // Other buttons slide out in opposite directions
-                    if (selectedDifficulty === 'hard') { // If left button selected
+                    if (selectedDifficulty === 'hard') {
                       animationClass = 'animate-slide-out-right';
-                    } else if (selectedDifficulty === 'easy') { // If right button selected
+                    } else if (selectedDifficulty === 'easy') {
                       animationClass = 'animate-slide-out-left';
-                    } else { // If middle button selected
+                    } else {
                       animationClass = index === 0 ? 'animate-slide-out-left' : 'animate-slide-out-right';
                     }
                   }

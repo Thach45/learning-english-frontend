@@ -1,13 +1,34 @@
+export enum PartOfSpeech {
+  NOUN = 'NOUN',
+  VERB = 'VERB',
+  ADJECTIVE = 'ADJECTIVE',
+  ADVERB = 'ADVERB',
+  PRONOUN = 'PRONOUN',
+  PREPOSITION = 'PREPOSITION',
+  CONJUNCTION = 'CONJUNCTION',
+  INTERJECTION = 'INTERJECTION',
+  DETERMINER = 'DETERMINER',
+  OTHER = 'OTHER'
+}
+
+export interface AlternativeMeaning {
+  partOfSpeech: PartOfSpeech;
+  meaning: string;
+}
+
 export interface Vocabulary {
   id: string;
   word: string;
   pronunciation: string;
   meaning: string;
   definition: string;
+  cefrLevel?: string;
   example: string;
   imageUrl?: string;
   audioUrl?: string;
-  
+  partOfSpeech: PartOfSpeech;
+  alternativePartOfSpeech: PartOfSpeech[];
+  alternativeMeanings?: AlternativeMeaning[];
 }
 export interface ReviewVocabulary {
   vocabularyId: string;
@@ -16,8 +37,10 @@ export interface ReviewVocabulary {
   definition?: string;
   example?: string;
   imageUrl?: string;
+  cefrLevel?: string;
   audioUrl?: string;
   pronunciation?: string;
+  partOfSpeech?: string;
   level: 'beginner' | 'intermediate' | 'advanced';
   status: string;
   nextReviewAt?: string;
@@ -126,14 +149,17 @@ export interface Category {
 }
 
 export interface AddVocabulary {
- 
   word: string;
   pronunciation?: string;
   meaning: string;
+  cefrLevel?: string;
   definition?: string;
   example?: string;
   imageUrl?: string;
   audioUrl?: string;
+  partOfSpeech: PartOfSpeech;
+  alternativePartOfSpeech: PartOfSpeech[];
+  alternativeMeanings?: AlternativeMeaning[];
 }
 
 export interface UpdateVocabulary extends AddVocabulary {
