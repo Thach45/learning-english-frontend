@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Navigation from './Navigation';
+import DictionaryShortcut from './DictionaryShortcut';
 
 const Layout: React.FC = () => {
   return (
@@ -9,6 +10,8 @@ const Layout: React.FC = () => {
       <main>
         <Outlet />
       </main>
+      {/* Dictionary Shortcut - Available on all pages */}
+      <DictionaryShortcut position="bottom-right" />
     </div>
   );
 };

@@ -112,3 +112,10 @@ export async function updateVocabularyProgress(vocabId: string, result: 'easy' |
   const res = await api.patch(`/learning/vocabulary/${vocabId}/progress`, { result });
   return res.data;
 } 
+
+export async function fetchDictionary(word: string, langue: string): Promise<any> {
+  const res = await api.get(`/vocabulary/search`, {
+    params: { word, langue }
+  });
+  return res.data;
+}
