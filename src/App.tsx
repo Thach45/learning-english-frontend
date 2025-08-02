@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { GamificationProvider } from './context/GamificationContext';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -21,29 +22,31 @@ import DictionaryDemo from './components/DictionaryDemo';
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+      <GamificationProvider>
+        <Router>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
 
-          {/* Protected Routes */}
-          <Route element={<Layout />}>
-            <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/study-sets" element={<StudySets />} />
-              {/* <Route path="/study-sets/create" element={<CreateStudySet />} /> */}
-              <Route path="/study-sets/:id" element={<StudySetDetail />} />
-              <Route path="/learn/:studySetId/flashcards" element={<Learn />} />
-              <Route path="/achievements" element={<Achievements />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/categories" element={<Categories />} />
-              <Route path="/categories/:id" element={<CategoryDetailPage />} />
-              <Route path="/dictionary" element={<DictionaryDemo />} />
+            {/* Protected Routes */}
+            <Route element={<Layout />}>
+              <Route element={<ProtectedRoute />}>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/study-sets" element={<StudySets />} />
+                {/* <Route path="/study-sets/create" element={<CreateStudySet />} /> */}
+                <Route path="/study-sets/:id" element={<StudySetDetail />} />
+                <Route path="/learn/:studySetId/flashcards" element={<Learn />} />
+                <Route path="/achievements" element={<Achievements />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/categories" element={<Categories />} />
+                <Route path="/categories/:id" element={<CategoryDetailPage />} />
+                <Route path="/dictionary" element={<DictionaryDemo />} />
+              </Route>
             </Route>
-          </Route>
-        </Routes>
-      </Router>
+          </Routes>
+        </Router>
+      </GamificationProvider>
     </AuthProvider>
   );
 }

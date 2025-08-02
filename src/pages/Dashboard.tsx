@@ -1,12 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { User } from '../types';
-import { BookOpen, TrendingUp, Star, Trophy, Target, Clock } from 'lucide-react';
+import { BookOpen, TrendingUp, Star, Trophy, Target, Clock, Zap, Flame } from 'lucide-react';
+import { useGamification } from '../context/GamificationContext';
+import XPProgressBar from '../components/gamification/XPProgressBar';
+import StreakCard from '../components/gamification/StreakCard';
+import XPEventsList from '../components/gamification/XPEventsList';
 
 const Dashboard: React.FC = () => {
     const { user, accessToken, refreshToken, login } = useAuth();
     const navigate = useNavigate();
+    const { stats: gamificationStats, dailyActivity, xpEvents, isLoading } = useGamification();
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -34,6 +39,8 @@ const Dashboard: React.FC = () => {
         fetchUser();
     }, [accessToken, user, login]);
 
+
+
     if (!user) {
         return (
             <div className="flex items-center justify-center h-screen">
@@ -45,28 +52,28 @@ const Dashboard: React.FC = () => {
     const stats = [
         {
             label: 'Words Learned',
-            value: user.totalWordsLearned,
+            value: gamificationStats?.totalWordsLearned || user.totalWordsLearned,
             icon: BookOpen,
             color: 'text-blue-600',
             bgColor: 'bg-blue-100'
         },
         {
             label: 'Current Streak',
-            value: `${user.streak} days`,
+            value: `${gamificationStats?.streak || user.streak} days`,
             icon: TrendingUp,
             color: 'text-green-600',
             bgColor: 'bg-green-100'
         },
         {
             label: 'Level',
-            value: user.level,
+            value: gamificationStats?.level || user.level,
             icon: Star,
             color: 'text-purple-600',
             bgColor: 'bg-purple-100'
         },
         {
             label: 'XP Points',
-            value: user.xp,
+            value: gamificationStats?.xp || user.xp,
             icon: Trophy,
             color: 'text-yellow-600',
             bgColor: 'bg-yellow-100'
@@ -103,16 +110,33 @@ const Dashboard: React.FC = () => {
                 })}
             </div>
             
-            {/* Today's Goal - using dailyGoal from user */}
-            <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-6 mb-8 text-white">
-                <div className="flex items-center justify-between mb-4">
-                <div>
-                    <h3 className="text-xl font-bold">Today's Goal</h3>
-                    <p className="text-blue-100">Learn {user.dailyGoal} new words</p>
-                </div>
-                <Target className="h-8 w-8 text-blue-200" />
-                </div>
-                {/* Progress bar can be implemented later when we track daily progress */}
+            {/* Gamification Section */}
+            <div className="grid lg:grid-cols-2 gap-6 mb-8">
+                {/* XP Progress Bar */}
+                {gamificationStats && (
+                    <XPProgressBar
+                        currentXP={gamificationStats.xp}
+                        level={gamificationStats.level}
+                        xpForNextLevel={gamificationStats.xpForNextLevel}
+                        xpProgress={gamificationStats.xpProgress}
+                        isMaxLevel={gamificationStats.isMaxLevel}
+                    />
+                )}
+
+                {/* Streak Card */}
+                {dailyActivity && gamificationStats && (
+                    <StreakCard
+                        streak={gamificationStats.streak}
+                        dailyGoal={gamificationStats.dailyGoal}
+                        wordsLearned={dailyActivity.wordsLearned}
+                        wordsReviewed={dailyActivity.wordsReviewed}
+                    />
+                )}
+            </div>
+
+            {/* XP Events */}
+            <div className="mb-8">
+                <XPEventsList events={xpEvents?.events || []} isLoading={isLoading} />
             </div>
 
 
@@ -139,26 +163,32 @@ const Dashboard: React.FC = () => {
                 </div>
 
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Learning Streak</h3>
-                    <div className="flex items-center space-x-2 mb-4">
-                        <div className="text-3xl">🔥</div>
-                        <div>
-                            <p className="text-2xl font-bold text-gray-900">{user.streak} days</p>
-                            <p className="text-sm text-gray-600">Keep it up!</p>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Stats</h3>
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Total XP Earned</span>
+                            <span className="font-semibold text-gray-900">
+                                {gamificationStats?.xp || user.xp} XP
+                            </span>
                         </div>
-                    </div>
-                    <div className="grid grid-cols-7 gap-2">
-                        {[...Array(7)].map((_, i) => (
-                            <div
-                                key={i}
-                                className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium ${i < (user.streak % 7) // Simple visualization for the week
-                                    ? 'bg-green-500 text-white'
-                                    : 'bg-gray-200 text-gray-600'
-                                    }`}
-                            >
-                                D{i + 1}
-                            </div>
-                        ))}
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Current Level</span>
+                            <span className="font-semibold text-gray-900">
+                                Level {gamificationStats?.level || user.level}
+                            </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Learning Streak</span>
+                            <span className="font-semibold text-gray-900">
+                                {gamificationStats?.streak || user.streak} days
+                            </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Words</span>
+                            <span className="font-semibold text-gray-900">
+                                {gamificationStats?.totalWordsLearned || user.totalWordsLearned}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>

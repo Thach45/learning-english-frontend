@@ -74,12 +74,7 @@ const StudySetDetail: React.FC = () => {
     loadData();
   }, [id, navigate]);
 
-  const handleStartFlashcards = () => {
-    // Nếu số từ cần ôn tập bằng số từ đã học, tự động chuyển sang review mode
-    const mode = learningStats.needReview === learningStats.learned ? 'review' : 'practice';
-    navigate(`/learn/${id}/flashcards?mode=${mode}`);
   
-  };
 
   const handleStartQuiz = () => {
     navigate(`/learn/quiz?studySetId=${id}`);
@@ -222,7 +217,8 @@ const StudySetDetail: React.FC = () => {
 
   const handleStartLearning = () => {
     // Nếu số từ cần ôn tập bằng số từ đã học, tự động chuyển sang review mode
-    const mode = learningStats.needReview === learningStats.learned ? 'review' : 'practice';
+    const mode = learningStats.total === learningStats.allReview ? 'review' : 'practice';
+    console.log("mode", mode);
     navigate(`/learn/${id}/flashcards?mode=${mode}`);
   };
 
@@ -486,7 +482,7 @@ const StudySetDetail: React.FC = () => {
             {/* Study Actions */}
             <div className="grid md:grid-cols-2 gap-4 mt-8">
               <button
-                onClick={handleStartFlashcards}
+                onClick={handleStartLearning}
                 className="flex items-center justify-center px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
               >
                 <Play className="h-5 w-5 mr-2" />
