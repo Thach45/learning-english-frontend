@@ -19,7 +19,7 @@ const StreakCard: React.FC<StreakCardProps> = ({
   const [weeklyActivity, setWeeklyActivity] = useState<boolean[]>([]);
   const [isLoadingCalendar, setIsLoadingCalendar] = useState(true);
 
-  const totalActivity = wordsLearned + wordsReviewed;
+  const totalActivity = wordsLearned;
   const goalProgress = Math.min(100, (totalActivity / dailyGoal) * 100);
   const isGoalCompleted = totalActivity >= dailyGoal;
 

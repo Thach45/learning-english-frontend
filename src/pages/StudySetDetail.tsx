@@ -6,6 +6,7 @@ import api, { fetchStudySetStats } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import AddVocabularyForm from '../components/pageStudySetDetail/AddVocabularyForm';
 import { motion } from 'framer-motion';
+import LearningProgressCard from '../components/pageStudySetDetail/LearningProgressCard';
 import VocabularyCard from '../components/pageStudySetDetail/VocabularyCard';
 
 
@@ -43,10 +44,10 @@ const StudySetDetail: React.FC = () => {
   const [definitionMap, setDefinitionMap] = useState<Record<string, string>>({});
   const [learningStats, setLearningStats] = useState<StudySetStats>({
     total: 0,
-    learned: 0,
+    review: 0,
     needReview: 0,
     mastered: 0,
-    allReview: 0
+   
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -217,7 +218,7 @@ const StudySetDetail: React.FC = () => {
 
   const handleStartLearning = () => {
     // Nếu số từ cần ôn tập bằng số từ đã học, tự động chuyển sang review mode
-    const mode = learningStats.total === learningStats.allReview ? 'review' : 'practice';
+    const mode = learningStats.total === learningStats.review + learningStats.needReview ? 'review' : 'practice';
     console.log("mode", mode);
     navigate(`/learn/${id}/flashcards?mode=${mode}`);
   };
@@ -356,148 +357,12 @@ const StudySetDetail: React.FC = () => {
               )}
             </div>
           </div>
-
           {/* Learning Stats Section */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">Learning Progress</h2>
-              <div className="text-sm text-gray-500">
-                Last studied: {new Date().toLocaleDateString()}
-              </div>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {/* Total Words */}
-              <div className="bg-white rounded-xl p-4 border-l-4 border border-blue-500 border-l-blue-500 hover:border-blue-500 transition-colors">
-                <div className="flex items-center justify-between mb-2">
-                  <BookOpenIcon className="h-6 w-6 text-blue-500" />
-                  <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                    TOTAL
-                  </span>
-                </div>
-                <div className="mt-2">
-                  <div className="text-3xl font-bold text-gray-800">{learningStats.total}</div>
-                  <div className="text-sm text-blue-600 font-medium">Total Words</div>
-                </div>
-              </div>
-
-              {/* All Review Words */}
-              <div className="bg-white rounded-xl p-4 border-l-4 border border-indigo-500 border-l-indigo-500 hover:border-indigo-500 transition-colors">
-                <div className="flex items-center justify-between mb-2">
-                  <Brain className="h-6 w-6 text-indigo-500" />
-                  <span className="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">
-                    STUDIED
-                  </span>
-                </div>
-                <div className="mt-2">
-                  <div className="text-3xl font-bold text-gray-800">{learningStats.allReview}</div>
-                  <div className="text-sm text-indigo-600 font-medium">
-                    {Math.round((learningStats.allReview / learningStats.total) * 100)}% Started
-                  </div>
-                </div>
-              </div>
-
-              {/* Mastered Words */}
-              <div className="bg-white rounded-xl p-4 border-l-4 border border-purple-500 border-l-purple-500 hover:border-purple-500 transition-colors">
-                <div className="flex items-center justify-between mb-2">
-                  <Star className="h-6 w-6 text-purple-500" />
-                  <span className="text-xs font-medium text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
-                    MASTERED
-                  </span>
-                </div>
-                <div className="mt-2">
-                  <div className="text-3xl font-bold text-gray-800">{learningStats.mastered}</div>
-                  <div className="text-sm text-purple-600 font-medium">
-                    {Math.round((learningStats.mastered / learningStats.total) * 100)}% Complete
-                  </div>
-                </div>
-              </div>
-
-              {/* Learning Words */}
-              <div className="bg-white rounded-xl p-4 border-l-4 border border-green-500 border-l-green-500 hover:border-green-500 transition-colors">
-                <div className="flex items-center justify-between mb-2">
-                  <BookOpen className="h-6 w-6 text-green-500" />
-                  <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                    LEARNING
-                  </span>
-                </div>
-                <div className="mt-2">
-                  <div className="text-3xl font-bold text-gray-800">{learningStats.learned}</div>
-                  <div className="text-sm text-green-600 font-medium">In Progress</div>
-                </div>
-              </div>
-            </div>
-
-           
-            {/* Need Review Alert */}
-            {learningStats.needReview > 0 && (
-              <div className="mt-6 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-200">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-amber-100 p-2 rounded-lg">
-                    <RotateCcw className="h-5 w-5 text-amber-600" />
-                  </div>
-                  <div className="ml-3 flex-1">
-                    <p className="text-sm text-amber-800">
-                      You have <span className="font-semibold">{learningStats.needReview} words</span> that need review. 
-                      Keep your memory fresh by reviewing them now!
-                    </p>
-                  </div>
-                  <div className="ml-4">
-                    <button
-                      onClick={handleStartLearning}
-                      className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow"
-                    >
-                      Review Now
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Call to Action when no reviews needed */}
-            {learningStats.needReview === 0 && learningStats.total > 0 && learningStats.allReview > 0  && (
-              <div className="mt-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-green-100 p-2 rounded-lg">
-                    <Star className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div className="ml-3 flex-1">
-                    <p className="text-sm text-green-800">
-                      Great job! You're all caught up. Want to learn some new words?
-                    </p>
-                  </div>
-                  <div className="ml-4">
-                    <button
-                      onClick={handleStartLearning}
-                      className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow"
-                    >
-                      Continue Learning
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Study Actions */}
-            <div className="grid md:grid-cols-2 gap-4 mt-8">
-              <button
-                onClick={handleStartLearning}
-                className="flex items-center justify-center px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-              >
-                <Play className="h-5 w-5 mr-2" />
-                Study with Flashcards
-              </button>
-              
-              <button
-                onClick={handleStartQuiz}
-                className="flex items-center justify-center px-6 py-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
-              >
-                <Brain className="h-5 w-5 mr-2" />
-                Take Quiz
-              </button>
-            </div>
-          </div>
+          <LearningProgressCard
+            learningStats={learningStats}
+            onStartLearning={handleStartLearning}
+            onStartQuiz={handleStartQuiz}
+          />
         </div>
       </div>
 

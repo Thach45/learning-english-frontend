@@ -129,14 +129,7 @@ export interface Quiz {
   difficulty: number;
 }
 
-export interface StudySession {
-  id: string;
-  userId: string;
-  vocabularyId: string;
-  result: 'correct' | 'incorrect' | 'partial';
-  timeSpent: number;
-  timestamp: Date;
-}
+
 
 export interface Category {
   id: string;
@@ -168,8 +161,7 @@ export interface UpdateVocabulary extends AddVocabulary {
 
 export interface StudySetStats {
   total: number;
-  learned: number;
+  review: number;
   needReview: number;
   mastered: number;
-  allReview: number;
 }
