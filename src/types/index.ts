@@ -11,6 +11,17 @@ export enum PartOfSpeech {
   OTHER = 'OTHER'
 }
 
+export enum CefrLevel {
+  A1 = 'A1',
+  A2 = 'A2',
+  B1 = 'B1',
+  B2 = 'B2',
+  C1 = 'C1',
+  C2 = 'C2',
+  OTHER = 'OTHER',
+  UNKNOWN = 'UNKNOWN', 
+}
+
 export interface AlternativeMeaning {
   partOfSpeech: PartOfSpeech;
   meaning: string;
@@ -22,7 +33,7 @@ export interface Vocabulary {
   pronunciation: string;
   meaning: string;
   definition: string;
-  cefrLevel?: string;
+  cefrLevel?: CefrLevel; // ✅ Updated to use enum
   example: string;
   imageUrl?: string;
   audioUrl?: string;
@@ -30,6 +41,7 @@ export interface Vocabulary {
   alternativePartOfSpeech: PartOfSpeech[];
   alternativeMeanings?: AlternativeMeaning[];
 }
+
 export interface ReviewVocabulary {
   vocabularyId: string;
   word: string;
@@ -37,7 +49,7 @@ export interface ReviewVocabulary {
   definition?: string;
   example?: string;
   imageUrl?: string;
-  cefrLevel?: string;
+  cefrLevel?: CefrLevel; // ✅ Updated to use enum
   audioUrl?: string;
   pronunciation?: string;
   partOfSpeech?: string;
@@ -50,6 +62,7 @@ export interface ReviewVocabulary {
   easeFactor: number;
   interval: number;
 }
+
 export interface LearnVocabulary extends Vocabulary {
   isLearned: boolean;
   isFavorite: boolean;
@@ -76,12 +89,14 @@ export interface StudySet {
   vocabularies?: Vocabulary[];
   author?: { id: string; name: string };
 }
+
 export interface StudySetResponse {
   data: StudySet[];
   total: number;
   page: number;
   pageSize: number;
 }
+
 export interface UserProgress {
   id: string;
   userId: string;
@@ -129,8 +144,6 @@ export interface Quiz {
   difficulty: number;
 }
 
-
-
 export interface Category {
   id: string;
   name: string;
@@ -145,7 +158,7 @@ export interface AddVocabulary {
   word: string;
   pronunciation?: string;
   meaning: string;
-  cefrLevel?: string;
+  cefrLevel?: CefrLevel; // ✅ Updated to use enum
   definition?: string;
   example?: string;
   imageUrl?: string;

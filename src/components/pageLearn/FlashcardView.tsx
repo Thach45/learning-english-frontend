@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Volume2, RotateCcw, Eye, EyeOff, Star, ArrowRight, BookOpen, Tag } from 'lucide-react';
-import { ReviewVocabulary } from '../../types';
+import { ReviewVocabulary, CefrLevel } from '../../types';
 
 interface FlashcardProps {
   vocabulary: ReviewVocabulary;
@@ -114,14 +114,14 @@ const Flashcard: React.FC<FlashcardProps> = ({
     return configs[difficulty];
   };
 
-  const getCefrColor = (level?: string) => {
-    switch (level?.toUpperCase()) {
-      case 'A1': return 'bg-green-100 text-green-800 border-green-200';
-      case 'A2': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-      case 'B1': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'B2': return 'bg-indigo-100 text-indigo-800 border-indigo-200';
-      case 'C1': return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'C2': return 'bg-pink-100 text-pink-800 border-pink-200';
+  const getCefrColor = (level?: CefrLevel) => {
+    switch (level) {
+      case CefrLevel.A1: return 'bg-green-100 text-green-800 border-green-200';
+      case CefrLevel.A2: return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      case CefrLevel.B1: return 'bg-blue-100 text-blue-800 border-blue-200';
+      case CefrLevel.B2: return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+      case CefrLevel.C1: return 'bg-purple-100 text-purple-800 border-purple-200';
+      case CefrLevel.C2: return 'bg-pink-100 text-pink-800 border-pink-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };

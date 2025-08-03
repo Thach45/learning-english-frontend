@@ -1,6 +1,6 @@
 import React from 'react';
 import { Lightbulb, BookOpen as BookOpenIcon, PlusCircle, Speaker, Tag, RefreshCw, ExternalLink, Star } from 'lucide-react';
-import { AddVocabulary, PartOfSpeech } from '../../types';
+import { AddVocabulary, CefrLevel, PartOfSpeech } from '../../types';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { translateWithTemplate } from '../../utils/translation';
@@ -208,15 +208,15 @@ const AddVocabularyForm: React.FC<AddVocabularyFormProps> = ({
               <select
                 className="w-full border rounded-lg pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg bg-white appearance-none"
                 value={newVocab.cefrLevel || ''}
-                onChange={e => setNewVocab(v => ({ ...v, cefrLevel: e.target.value }))}
+                onChange={e => setNewVocab(v => ({ ...v, cefrLevel: e.target.value as CefrLevel }))}
               >
                 <option value="">Select level</option>
-                <option value="A1" className="text-green-700">A1 - Beginner</option>
-                <option value="A2" className="text-emerald-700">A2 - Elementary</option>
-                <option value="B1" className="text-blue-700">B1 - Intermediate</option>
-                <option value="B2" className="text-indigo-700">B2 - Upper Intermediate</option>
-                <option value="C1" className="text-purple-700">C1 - Advanced</option>
-                <option value="C2" className="text-pink-700">C2 - Mastery</option>
+                <option value={CefrLevel.A1} className="text-green-700">A1 - Beginner</option>
+                <option value={CefrLevel.A2} className="text-emerald-700">A2 - Elementary</option>
+                <option value={CefrLevel.B1} className="text-blue-700">B1 - Intermediate</option>
+                <option value={CefrLevel.B2} className="text-indigo-700">B2 - Upper Intermediate</option>
+                <option value={CefrLevel.C1} className="text-purple-700">C1 - Advanced</option>
+                <option value={CefrLevel.C2} className="text-pink-700">C2 - Mastery</option>
               </select>
               <Star className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 ${
                 newVocab.cefrLevel ? 'text-yellow-500' : 'text-gray-400'
@@ -230,15 +230,16 @@ const AddVocabularyForm: React.FC<AddVocabularyFormProps> = ({
             {newVocab.cefrLevel && (
               <div className="mt-2">
                 <div className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
-                  newVocab.cefrLevel === 'A1' ? 'bg-green-100 text-green-800' :
-                  newVocab.cefrLevel === 'A2' ? 'bg-emerald-100 text-emerald-800' :
-                  newVocab.cefrLevel === 'B1' ? 'bg-blue-100 text-blue-800' :
-                  newVocab.cefrLevel === 'B2' ? 'bg-indigo-100 text-indigo-800' :
-                  newVocab.cefrLevel === 'C1' ? 'bg-purple-100 text-purple-800' :
-                  'bg-pink-100 text-pink-800'
+                  newVocab.cefrLevel === CefrLevel.A1 ? 'bg-green-100 text-green-800' :
+                  newVocab.cefrLevel === CefrLevel.A2 ? 'bg-emerald-100 text-emerald-800' :
+                  newVocab.cefrLevel === CefrLevel.B1 ? 'bg-blue-100 text-blue-800' :
+                  newVocab.cefrLevel === CefrLevel.B2 ? 'bg-indigo-100 text-indigo-800' :
+                  newVocab.cefrLevel === CefrLevel.C1 ? 'bg-purple-100 text-purple-800' :
+                  newVocab.cefrLevel === CefrLevel.C2 ? 'bg-pink-100 text-pink-800' :
+                  'bg-gray-100 text-gray-800'
                 }`}>
                   <Star className="w-3 h-3 mr-1" />
-                  {newVocab.cefrLevel.toUpperCase()}
+                  {newVocab.cefrLevel}
                 </div>
               </div>
             )}

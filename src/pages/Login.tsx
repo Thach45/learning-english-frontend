@@ -27,7 +27,7 @@ const LoginPage: React.FC = () => {
 
             const { data } = await response.json();
             login(data.accessToken, data.refreshToken, data.user);
-            navigate('/'); // Redirect to dashboard after login
+            navigate('/dashboard'); // Redirect to dashboard after login
 
         } catch (err: any) {
             setError(err.message);

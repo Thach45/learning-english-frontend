@@ -81,7 +81,7 @@ const Navigation: React.FC = () => {
   const { user, logout } = useAuth(); // Get user as well for mobile view
 
   const navItems = [
-    { id: '/', label: 'Dashboard', icon: Home },
+    { id: '/dashboard', label: 'Dashboard', icon: Home },
     { id: '/categories', label: 'Categories', icon: Folder },
     { id: '/study-sets', label: 'Study Sets', icon: BookOpen },
  
@@ -89,7 +89,8 @@ const Navigation: React.FC = () => {
   ];
 
   const handleNavigation = (path: string) => {
-    navigate(path);
+    // navigate(path);
+    window.location.href = path;
     setIsMobileMenuOpen(false);
   };
 

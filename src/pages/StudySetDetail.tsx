@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Play, Brain, BookOpen, Share2, Users, Calendar, Globe, Lock, Star, X, Lightbulb, BookOpen as BookOpenIcon, PlusCircle, Speaker, Speech, RotateCcw, Search, List, Grid, ChevronLeft, ChevronRight, Edit, Trash } from 'lucide-react';
-import { AddVocabulary, StudySet, StudySetStats, UpdateVocabulary, Vocabulary, PartOfSpeech } from '../types';
+import { ArrowLeft, BookOpen, Share2, Users, Calendar, Globe, Lock, Star, X, Lightbulb, BookOpen as BookOpenIcon, PlusCircle, Speaker, Speech, RotateCcw, Search, List, Grid, ChevronLeft, ChevronRight, Edit, Trash } from 'lucide-react';
+import { AddVocabulary, StudySet, StudySetStats, UpdateVocabulary, Vocabulary, PartOfSpeech, CefrLevel } from '../types';
 import api, { fetchStudySetStats } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import AddVocabularyForm from '../components/pageStudySetDetail/AddVocabularyForm';
 import { motion } from 'framer-motion';
 import LearningProgressCard from '../components/pageStudySetDetail/LearningProgressCard';
 import VocabularyCard from '../components/pageStudySetDetail/VocabularyCard';
-
+import { useNotificationHelper } from '../utils/notification';
 
 const StudySetDetail: React.FC = () => {
+  const { notify } = useNotificationHelper();
   const { user } = useAuth();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -35,9 +36,6 @@ const StudySetDetail: React.FC = () => {
   const [editLoading, setEditLoading] = useState(false);
   const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null);
   const [deleteConfirmVocab, setDeleteConfirmVocab] = useState<Vocabulary | null>(null);
-  // Thêm state cho notification
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState('');
   // Thêm state cho các loại từ khi có nhiều loại
   const [partOfSpeechOptions, setPartOfSpeechOptions] = useState<string[]>([]);
   const [selectedPartOfSpeech, setSelectedPartOfSpeech] = useState<string>('');
@@ -54,23 +52,23 @@ const StudySetDetail: React.FC = () => {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const itemsPerPage = 5;
 
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [studySetRes, statsRes] = await Promise.all([
+        api.get(`/study-sets/${id}`),
+        fetchStudySetStats(id || '')
+      ]);
+      
+      setStudySet(studySetRes.data.data);
+      setVocabularies(studySetRes.data.data.vocabularies);
+      setLearningStats(statsRes);
+    } catch (error) {
+      notify.custom.error('Lỗi', 'Không thể tải thông tin study set');
+    }
+    setLoading(false);
+  };
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      try {
-        const [studySetRes, statsRes] = await Promise.all([
-          api.get(`/study-sets/${id}`),
-          fetchStudySetStats(id || '')
-        ]);
-        
-        setStudySet(studySetRes.data.data);
-        setVocabularies(studySetRes.data.data.vocabularies);
-        setLearningStats(statsRes);
-      } catch (error) {
-        console.error(error);
-      }
-      setLoading(false);
-    };
 
     loadData();
   }, [id, navigate]);
@@ -95,7 +93,7 @@ const StudySetDetail: React.FC = () => {
       });
     } else {
       navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
-      alert('Study set link copied to clipboard!');
+      notify.studySetLinkCopied();
     }
   };
 
@@ -108,9 +106,10 @@ const StudySetDetail: React.FC = () => {
       setVocabularies((prev) => [...prev, res.data.data]);
       setShowAddVocabModal(false);
       setNewVocab({ word: '', meaning: '', pronunciation: '', definition: '', example: '', imageUrl: '', audioUrl: '', partOfSpeech: PartOfSpeech.OTHER, alternativePartOfSpeech: [] });
+      notify.vocabularyAdded();
+      loadData();
     } catch (error: any) {
-      console.log(error);
-      alert(error?.response?.data?.message || 'Thêm từ vựng thất bại.');
+      notify.vocabularyAddFailed(error?.response?.data?.message);
     }
     setAddLoading(false);
   };
@@ -133,16 +132,18 @@ const StudySetDetail: React.FC = () => {
         imageUrl: editVocab.imageUrl,
         audioUrl: editVocab.audioUrl,
         partOfSpeech: editVocab.partOfSpeech || PartOfSpeech.OTHER,
-        alternativePartOfSpeech: editVocab.alternativePartOfSpeech || []
+        cefrLevel: editVocab.cefrLevel || CefrLevel.UNKNOWN,
       }
-      console.log("editVocab", updatedVocab);
+      console.log("updatedVocab", updatedVocab);
       const res = await api.put(`/study-sets/${id}/vocabularies/${editVocab.id}`, updatedVocab);
-      console.log(res);
+      
+  
       setVocabularies((prev) => prev.map(v => v.id === editVocab.id ? res.data.data : v));
       setShowEditVocabModal(false);
       setEditVocab(null);
+      notify.vocabularyUpdated();
     } catch (error: any) {
-      alert(error?.response?.data?.message || 'Cập nhật từ vựng thất bại.');
+      notify.vocabularyUpdateFailed(error?.response?.data?.message);
     }
     setEditLoading(false);
   };
@@ -154,8 +155,10 @@ const StudySetDetail: React.FC = () => {
       await api.delete(`/study-sets/${id}/vocabularies/${deleteConfirmVocab.id}`);
       setVocabularies((prev) => prev.filter(v => v.id !== deleteConfirmVocab.id));
       setDeleteConfirmVocab(null);
+      notify.vocabularyDeleted();
+      loadData();
     } catch (error: any) {
-      alert(error?.response?.data?.message || 'Xoá từ vựng thất bại.');
+      notify.vocabularyDeleteFailed(error?.response?.data?.message);
     }
     setDeleteLoadingId(null);
   };
@@ -182,22 +185,19 @@ const StudySetDetail: React.FC = () => {
         definition: data.definition || '',
         example: data.example || '',
         audioUrl: data.audioUrl || '',
-        cefrLevel: data.cefrLevel || '',
+        cefrLevel: data.cefrLevel || CefrLevel.UNKNOWN,
         partOfSpeech: data.partOfSpeech || PartOfSpeech.OTHER,
         alternativePartOfSpeech: data.alternativePartOfSpeech || []
       }));
 
       if (data.partOfSpeech) {
-        setNotificationMessage(
+        notify.custom.info(
+          'Auto-fill Success', 
           `Từ "${newVocab.word}" được xác định là ${data.partOfSpeech.toLowerCase()}`
         );
-        setShowNotification(true);
-        setTimeout(() => setShowNotification(false), 3000);
       }
     } catch (err) {
-      setNotificationMessage('Không lấy được gợi ý tự động!');
-      setShowNotification(true);
-      setTimeout(() => setShowNotification(false), 3000);
+      notify.autoSuggestionFailed();
     }
   };
   const handlePlayAudio = (audioUrl: string) => {
@@ -526,13 +526,6 @@ const StudySetDetail: React.FC = () => {
       {showAddVocabModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl relative">
-            {/* Notification UI */}
-            {showNotification && (
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-blue-100 border border-blue-300 text-blue-800 px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-fade-in z-50">
-                <Lightbulb className="w-5 h-5 text-blue-500" />
-                <span className="font-medium">{notificationMessage}</span>
-              </div>
-            )}
             <button
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
               onClick={() => setShowAddVocabModal(false)}
@@ -589,15 +582,15 @@ const StudySetDetail: React.FC = () => {
                 <select
                   className="w-full border rounded pl-9 pr-3 py-2 appearance-none bg-white"
                   value={editVocab.cefrLevel || ''}
-                  onChange={e => setEditVocab(v => v ? { ...v, cefrLevel: e.target.value } : v)}
+                  onChange={e => setEditVocab(v => v ? { ...v, cefrLevel: e.target.value as CefrLevel } : v)}
                 >
                   <option value="">Select CEFR level</option>
-                  <option value="A1" className="text-green-700">A1 - Beginner</option>
-                  <option value="A2" className="text-emerald-700">A2 - Elementary</option>
-                  <option value="B1" className="text-blue-700">B1 - Intermediate</option>
-                  <option value="B2" className="text-indigo-700">B2 - Upper Intermediate</option>
-                  <option value="C1" className="text-purple-700">C1 - Advanced</option>
-                  <option value="C2" className="text-pink-700">C2 - Mastery</option>
+                  <option value={CefrLevel.A1} className="text-green-700">A1 - Beginner</option>
+                  <option value={CefrLevel.A2} className="text-emerald-700">A2 - Elementary</option>
+                  <option value={CefrLevel.B1} className="text-blue-700">B1 - Intermediate</option>
+                  <option value={CefrLevel.B2} className="text-indigo-700">B2 - Upper Intermediate</option>
+                  <option value={CefrLevel.C1} className="text-purple-700">C1 - Advanced</option>
+                  <option value={CefrLevel.C2} className="text-pink-700">C2 - Mastery</option>
                 </select>
                 <Star className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
                   editVocab.cefrLevel ? 'text-yellow-500' : 'text-gray-400'
