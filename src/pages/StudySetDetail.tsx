@@ -218,7 +218,8 @@ const StudySetDetail: React.FC = () => {
 
   const handleStartLearning = () => {
     // Nếu số từ cần ôn tập bằng số từ đã học, tự động chuyển sang review mode
-    const mode = learningStats.total === learningStats.review + learningStats.needReview ? 'review' : 'practice';
+   
+    const mode = learningStats.total === learningStats.needReview ? 'review' : 'practice';
     console.log("mode", mode);
     navigate(`/learn/${id}/flashcards?mode=${mode}`);
   };

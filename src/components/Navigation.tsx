@@ -84,7 +84,6 @@ const Navigation: React.FC = () => {
     { id: '/dashboard', label: 'Dashboard', icon: Home },
     { id: '/categories', label: 'Categories', icon: Folder },
     { id: '/study-sets', label: 'Study Sets', icon: BookOpen },
- 
     { id: '/achievements', label: 'Achievements', icon: Trophy },
   ];
 

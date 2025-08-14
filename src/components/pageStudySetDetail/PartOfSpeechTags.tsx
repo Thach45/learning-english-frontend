@@ -20,7 +20,7 @@ const PartOfSpeechTags: React.FC<PartOfSpeechTagsProps> = ({
       <div className="flex items-center gap-1">
         {showIcon && <Tag className="w-4 h-4 text-blue-500" />}
         <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
-          {mainPos.toLowerCase()}
+          {mainPos?.toLowerCase() || ''}
         </span>
       </div>
       

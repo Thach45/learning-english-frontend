@@ -135,13 +135,13 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* XP Events */}
-            <div className="mb-8">
+            {/* <div className="mb-8">
                 <XPEventsList events={xpEvents?.events || []} isLoading={isLoading} />
-            </div>
+            </div> */}
 
 
             {/* Quick Actions */}
-            <div className="grid md:grid-cols-2 gap-6 mb-8">
+            {/* <div className="grid md:grid-cols-2 gap-6 mb-8">
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
                     <div className="space-y-3">
@@ -191,7 +191,7 @@ const Dashboard: React.FC = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
         </div>
     );
 };
