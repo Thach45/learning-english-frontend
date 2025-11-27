@@ -5,6 +5,8 @@ import { AddVocabulary, StudySet, StudySetStats, UpdateVocabulary, Vocabulary, P
 import api, { fetchStudySetStats } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import AddVocabularyForm from '../components/pageStudySetDetail/AddVocabularyForm';
+import OptionalAddVocab, { VocabCreationMode } from '../components/pageStudySetDetail/OptionalAddVocab';
+import AIVocabularySuggestions from '../components/pageStudySetDetail/AIVocabularySuggestions';
 import { motion } from 'framer-motion';
 import LearningProgressCard from '../components/pageStudySetDetail/LearningProgressCard';
 import VocabularyCard from '../components/pageStudySetDetail/VocabularyCard';
@@ -50,6 +52,10 @@ const StudySetDetail: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [creationMode, setCreationMode] = useState<VocabCreationMode | null>(null);
+  const [aiSuggestions, setAiSuggestions] = useState<Vocabulary[]>([]);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [addingSelected, setAddingSelected] = useState(false);
   const itemsPerPage = 5;
 
   const loadData = async () => {
@@ -215,6 +221,86 @@ const StudySetDetail: React.FC = () => {
       }));
     }
   }, [selectedPartOfSpeech]);
+
+  const handleCreationModeInfo = async (mode: VocabCreationMode) => {
+    if (mode === 'ai') {
+      setAiLoading(true);
+      try {
+        const res = await api.post(`/vocabulary/generate/ai`, {
+          idStudySet: id,
+        });
+        const data = res.data.data || res.data;
+        if (Array.isArray(data)) {
+          setAiSuggestions(data);
+        } else {
+          notify.custom.error('Lỗi', 'Không thể tải đề xuất từ AI');
+        }
+      } catch (error: any) {
+        notify.custom.error('Lỗi', error?.response?.data?.message || 'Không thể tải đề xuất từ AI');
+        setAiSuggestions([]);
+      } finally {
+        setAiLoading(false);
+      }
+    }
+
+    if (mode === 'article') {
+      notify.custom.info(
+        'Trích từ bài báo',
+        'Bạn có thể kết nối service NLP để phân tích bài viết và chọn ra từ vựng nổi bật.'
+      );
+    }
+  };
+
+  const handleCreationModeSelect = (mode: VocabCreationMode) => {
+    setCreationMode(mode);
+    if (mode !== 'manual') {
+      handleCreationModeInfo(mode);
+    }
+  };
+
+  const handleOpenAddVocabulary = () => {
+    setCreationMode(null);
+    setAiSuggestions([]);
+    setShowAddVocabModal(true);
+  };
+
+  const handleAddSelectedVocabularies = async (selectedIds: string[]) => {
+    if (selectedIds.length === 0) return;
+    
+    setAddingSelected(true);
+    try {
+      const selectedVocabs = aiSuggestions.filter((v) => selectedIds.includes((v as any).id || v.word));
+      
+      // Prepare vocabularies array for bulk add
+      const vocabularies = selectedVocabs.map((vocab) => ({
+        word: vocab.word,
+        meaning: vocab.meaning,
+        pronunciation: vocab.pronunciation || '',
+        definition: vocab.definition || '',
+        example: vocab.example || '',
+        imageUrl: vocab.imageUrl || '',
+        audioUrl: vocab.audioUrl || '',
+        partOfSpeech: vocab.partOfSpeech || PartOfSpeech.OTHER,
+       
+      }));
+
+      // Bulk add in single request
+      const res = await api.post(`/study-sets/${id}/vocabularies/bulk`, {
+        vocabularies,
+      });
+      
+      // Remove added vocabularies from suggestions
+      setAiSuggestions((prev) => prev.filter((v) => !selectedIds.includes((v as any).id || v.word)));
+      
+      const addedCount = res.data?.data?.success || selectedVocabs.length;
+      notify.custom.success('Thành công', `Đã thêm ${addedCount} từ vựng vào bộ học`);
+      loadData();
+    } catch (error: any) {
+      notify.vocabularyAddFailed(error?.response?.data?.message || 'Không thể thêm từ vựng');
+    } finally {
+      setAddingSelected(false);
+    }
+  };
 
   const handleStartLearning = () => {
     // Nếu số từ cần ôn tập bằng số từ đã học, tự động chuyển sang review mode
@@ -411,7 +497,7 @@ const StudySetDetail: React.FC = () => {
                 {isOwner && (
                   <>
                     <button
-                      onClick={() => setShowAddVocabModal(true)}
+                      onClick={handleOpenAddVocabulary}
                       className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
                     >
                       + Add Vocabulary
@@ -422,6 +508,7 @@ const StudySetDetail: React.FC = () => {
                 )}
               </div>
             </div>
+
           </div>
 
           <div className="p-6">
@@ -454,7 +541,7 @@ const StudySetDetail: React.FC = () => {
                 </p>
                 {isOwner && !searchTerm && (
                   <button
-                    onClick={() => setShowAddVocabModal(true)}
+                    onClick={handleOpenAddVocabulary}
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
                   >
                     + Add Vocabulary
@@ -538,14 +625,55 @@ const StudySetDetail: React.FC = () => {
               <X className="w-6 h-6" />
             </button>
 
-            <div className="p-8">
-              <AddVocabularyForm
-                newVocab={newVocab}
-                setNewVocab={setNewVocab}
-                handleAutoFillVocabulary={handleAutoFillVocabulary}
-                addLoading={addLoading}
-                onSubmit={handleAddVocabulary}
-              />
+            <div className="p-8 border border-gray-200 rounded-xl">
+              {!creationMode && (
+                <>
+                  <OptionalAddVocab
+                    selectedMode={creationMode}
+                    onSelect={handleCreationModeSelect}
+                  />
+                 
+                </>
+              )}
+
+              {creationMode === 'manual' && (
+                <div className="pt-8">
+                  <AddVocabularyForm
+                    newVocab={newVocab}
+                    setNewVocab={setNewVocab}
+                    handleAutoFillVocabulary={handleAutoFillVocabulary}
+                    addLoading={addLoading}
+                    onSubmit={handleAddVocabulary}
+                  />
+                </div>
+              )}
+
+              {creationMode === 'ai' && (
+                <div className="pt-8">
+                  <AIVocabularySuggestions
+                    suggestions={aiSuggestions}
+                    loading={aiLoading}
+                    onAddSelected={handleAddSelectedVocabularies}
+                    onPlayAudio={handlePlayAudio}
+                    adding={addingSelected}
+                  />
+                </div>
+              )}
+
+              {creationMode === 'article' && (
+                <div className="mt-8 rounded-xl border border-amber-200 bg-amber-50/70 p-6">
+                  <p className="text-sm font-semibold text-amber-700 uppercase tracking-wide mb-2">Mô phỏng</p>
+                  <h4 className="text-xl font-semibold text-gray-900 mb-3">Article Extraction</h4>
+                  <p className="text-gray-600 mb-4">
+                    Khu vực này sẽ nhận URL hoặc nội dung bài báo, hiển thị danh sách từ được trích cùng tần suất và ngữ cảnh.
+                  </p>
+                  <div className="space-y-2 text-sm text-amber-900">
+                    <p>• Bước 1: Người dùng dán link hoặc kéo-thả file.</p>
+                    <p>• Bước 2: Service NLP phân tích, trả về top từ quan trọng.</p>
+                    <p>• Bước 3: Cho phép chọn và thêm nhanh vào study set.</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
