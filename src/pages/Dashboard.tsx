@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { User } from '../types';
-import { BookOpen, TrendingUp, Star, Trophy, Target, Clock, Zap, Flame } from 'lucide-react';
+import { BookOpen, TrendingUp, Star, Trophy, Clock, Zap, Flame } from 'lucide-react';
 import { useGamification } from '../context/GamificationContext';
 import XPProgressBar from '../components/gamification/XPProgressBar';
 import StreakCard from '../components/gamification/StreakCard';
 import XPEventsList from '../components/gamification/XPEventsList';
+import InProgressAchievements from '../components/dashboard/InProgressAchievements';
 
 const Dashboard: React.FC = () => {
     const { user, accessToken, refreshToken, login } = useAuth();
@@ -24,11 +25,9 @@ const Dashboard: React.FC = () => {
                     });
                     if (response.ok) {
                         const { data } = await response.json();
-                        // The login function in context updates the user and stores it
                         login(accessToken, refreshToken ?? null, data as User);
                     } else {
                         console.error('Failed to fetch user data');
-                        // Optional: handle logout if token is invalid
                     }
                 } catch (error) {
                     console.error('Error fetching user data:', error);
@@ -38,8 +37,6 @@ const Dashboard: React.FC = () => {
 
         fetchUser();
     }, [accessToken, user, login]);
-
-
 
     if (!user) {
         return (
@@ -135,13 +132,16 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* XP Events */}
-            {/* <div className="mb-8">
+            <div className="mb-8">
                 <XPEventsList events={xpEvents?.events || []} isLoading={isLoading} />
+            </div>
+            {/* In-Progress Achievements */}
+            {/* <div className="mb-8">
+                <InProgressAchievements  />
             </div> */}
 
-
             {/* Quick Actions */}
-            {/* <div className="grid md:grid-cols-2 gap-6 mb-8">
+            <div className="grid md:grid-cols-2 gap-6 mb-8">
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
                     <div className="space-y-3">
@@ -191,7 +191,7 @@ const Dashboard: React.FC = () => {
                         </div>
                     </div>
                 </div>
-            </div> */}
+            </div>
         </div>
     );
 };

@@ -47,7 +47,7 @@ export const gamificationApi = {
   getDailyActivity: async (date?: string): Promise<DailyActivity> => {
     const params = date ? { date } : {};
     const response = await apiClient.get('/gamification/daily-activity-stats', { params });
-    console.log("response", response);
+   
     return response.data.data;
   },
 

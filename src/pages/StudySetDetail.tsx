@@ -219,7 +219,7 @@ const StudySetDetail: React.FC = () => {
   const handleStartLearning = () => {
     // Nếu số từ cần ôn tập bằng số từ đã học, tự động chuyển sang review mode
    
-    const mode = learningStats.total === learningStats.needReview ? 'review' : 'practice';
+    const mode = learningStats.needReview > 0 ? 'practice' : 'review';
     console.log("mode", mode);
     navigate(`/learn/${id}/flashcards?mode=${mode}`);
   };
@@ -409,12 +409,16 @@ const StudySetDetail: React.FC = () => {
                 </div>
 
                 {isOwner && (
-                  <button
-                    onClick={() => setShowAddVocabModal(true)}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
-                  >
-                    + Add Vocabulary
-                  </button>
+                  <>
+                    <button
+                      onClick={() => setShowAddVocabModal(true)}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
+                    >
+                      + Add Vocabulary
+                    </button>
+                    
+
+                  </>
                 )}
               </div>
             </div>
