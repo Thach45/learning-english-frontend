@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import AddVocabularyForm from '../components/pageStudySetDetail/AddVocabularyForm';
 import OptionalAddVocab, { VocabCreationMode } from '../components/pageStudySetDetail/OptionalAddVocab';
 import AIVocabularySuggestions from '../components/pageStudySetDetail/AIVocabularySuggestions';
+import ArticleExtraction from '../components/pageStudySetDetail/ArticleExtraction';
 import { motion } from 'framer-motion';
 import LearningProgressCard from '../components/pageStudySetDetail/LearningProgressCard';
 import VocabularyCard from '../components/pageStudySetDetail/VocabularyCard';
@@ -57,6 +58,11 @@ const StudySetDetail: React.FC = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const [addingSelected, setAddingSelected] = useState(false);
   const itemsPerPage = 5;
+  const handleCloseModal = () => {
+    setShowAddVocabModal(false);
+    setCreationMode(null);
+    setAiSuggestions([]);
+  };
 
   const loadData = async () => {
     setLoading(true);
@@ -614,67 +620,55 @@ const StudySetDetail: React.FC = () => {
           </div>
       </div>
 
-      {/* Add Vocabulary Modal */}
       {showAddVocabModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl relative">
-            <button
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-              onClick={() => setShowAddVocabModal(false)}
-            >
-              <X className="w-6 h-6" />
-            </button>
+          <div className="w-full max-w-5xl mx-auto">
+            {!creationMode && (
+              <OptionalAddVocab
+                selectedMode={creationMode}
+                onSelect={handleCreationModeSelect}
+                onClose={handleCloseModal}
+              />
+            )}
 
-            <div className="p-8 border border-gray-200 rounded-xl">
-              {!creationMode && (
-                <>
-                  <OptionalAddVocab
-                    selectedMode={creationMode}
-                    onSelect={handleCreationModeSelect}
-                  />
-                 
-                </>
-              )}
+            {creationMode === 'manual' && (
+              <div className="relative bg-white rounded-2xl border border-gray-200 p-8 shadow-xl">
+                <button
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+                  onClick={handleCloseModal}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <AddVocabularyForm
+                  newVocab={newVocab}
+                  setNewVocab={setNewVocab}
+                  handleAutoFillVocabulary={handleAutoFillVocabulary}
+                  addLoading={addLoading}
+                  onSubmit={handleAddVocabulary}
+                />
+              </div>
+            )}
 
-              {creationMode === 'manual' && (
-                <div className="pt-8">
-                  <AddVocabularyForm
-                    newVocab={newVocab}
-                    setNewVocab={setNewVocab}
-                    handleAutoFillVocabulary={handleAutoFillVocabulary}
-                    addLoading={addLoading}
-                    onSubmit={handleAddVocabulary}
-                  />
-                </div>
-              )}
+            {creationMode === 'ai' && (
+              <div className="relative bg-white rounded-2xl border border-gray-200 p-6 shadow-xl">
+                <AIVocabularySuggestions
+                  suggestions={aiSuggestions}
+                  loading={aiLoading}
+                  onAddSelected={handleAddSelectedVocabularies}
+                  onPlayAudio={handlePlayAudio}
+                  adding={addingSelected}
+                  onClose={handleCloseModal}
+                />
+              </div>
+            )}
 
-              {creationMode === 'ai' && (
-                <div className="pt-8">
-                  <AIVocabularySuggestions
-                    suggestions={aiSuggestions}
-                    loading={aiLoading}
-                    onAddSelected={handleAddSelectedVocabularies}
-                    onPlayAudio={handlePlayAudio}
-                    adding={addingSelected}
-                  />
-                </div>
-              )}
-
-              {creationMode === 'article' && (
-                <div className="mt-8 rounded-xl border border-amber-200 bg-amber-50/70 p-6">
-                  <p className="text-sm font-semibold text-amber-700 uppercase tracking-wide mb-2">Mô phỏng</p>
-                  <h4 className="text-xl font-semibold text-gray-900 mb-3">Article Extraction</h4>
-                  <p className="text-gray-600 mb-4">
-                    Khu vực này sẽ nhận URL hoặc nội dung bài báo, hiển thị danh sách từ được trích cùng tần suất và ngữ cảnh.
-                  </p>
-                  <div className="space-y-2 text-sm text-amber-900">
-                    <p>• Bước 1: Người dùng dán link hoặc kéo-thả file.</p>
-                    <p>• Bước 2: Service NLP phân tích, trả về top từ quan trọng.</p>
-                    <p>• Bước 3: Cho phép chọn và thêm nhanh vào study set.</p>
-                  </div>
-                </div>
-              )}
-            </div>
+            {creationMode === 'article' && (
+              <ArticleExtraction 
+                onClose={handleCloseModal} 
+                studySetId={id}
+                onAddSuccess={loadData}
+              />
+            )}
           </div>
         </div>
       )}

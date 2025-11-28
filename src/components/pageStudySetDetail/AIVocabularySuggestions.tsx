@@ -10,6 +10,7 @@ interface AIVocabularySuggestionsProps {
   onAddSelected: (selectedIds: string[]) => void;
   onPlayAudio?: (url: string) => void;
   adding?: boolean;
+  onClose?: () => void;
 }
 
 const AIVocabularySuggestions: React.FC<AIVocabularySuggestionsProps> = ({
@@ -18,6 +19,7 @@ const AIVocabularySuggestions: React.FC<AIVocabularySuggestionsProps> = ({
   onAddSelected,
   onPlayAudio,
   adding = false,
+  onClose,
 }) => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -81,7 +83,15 @@ const AIVocabularySuggestions: React.FC<AIVocabularySuggestionsProps> = ({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 relative">
+      {onClose && (
+        <button
+          className="absolute -top-2 -right-2 text-gray-400 hover:text-gray-600"
+          onClick={onClose}
+        >
+          <X className="w-5 h-5" />
+        </button>
+      )}
       {/* Header with select all */}
       <div className="flex items-center justify-between pb-4 border-b border-gray-200">
         <div className="flex items-center gap-3">

@@ -119,3 +119,10 @@ export async function fetchDictionary(word: string, langue: string): Promise<any
   return res.data;
 }
 
+export async function bulkAddVocabularies(studySetId: string, vocabularies: any[]) {
+  const res = await api.post(`/study-sets/${studySetId}/vocabularies/bulk`, {
+    vocabularies,
+  });
+  return res.data;
+}
+

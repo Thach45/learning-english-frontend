@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, PenSquare, Newspaper, Check, ArrowRight, Info } from 'lucide-react';
+import { Sparkles, PenSquare, Newspaper, Info, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export type VocabCreationMode = 'manual' | 'ai' | 'article';
@@ -20,6 +20,7 @@ interface ModeConfig {
 interface OptionalAddVocabProps {
   selectedMode: VocabCreationMode | null;
   onSelect: (mode: VocabCreationMode) => void;
+  onClose?: () => void;
 }
 
 const modeConfigs: ModeConfig[] = [
@@ -59,9 +60,17 @@ const modeConfigs: ModeConfig[] = [
   },
 ];
 
-const OptionalAddVocab: React.FC<OptionalAddVocabProps> = ({ selectedMode, onSelect }) => {
+const OptionalAddVocab: React.FC<OptionalAddVocabProps> = ({ selectedMode, onSelect, onClose }) => {
   return (
-    <div className="w-full max-w-6xl mx-auto">
+    <div className="relative w-full max-w-6xl mx-auto bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+      {onClose && (
+        <button
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+          onClick={onClose}
+        >
+          <X className="w-5 h-5" />
+        </button>
+      )}
       {/* Header Section */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>

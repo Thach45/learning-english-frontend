@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, BookOpen, Brain, Trophy, User, Upload, Settings, Menu, X, LogOut, Folder } from 'lucide-react';
+import { Home, BookOpen, Brain, Trophy, User, Upload, Settings, Menu, X, LogOut, Folder, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface NavItemProps {
@@ -81,10 +81,11 @@ const Navigation: React.FC = () => {
   const { user, logout } = useAuth(); // Get user as well for mobile view
 
   const navItems = [
-    { id: '/dashboard', label: 'Dashboard', icon: Home },
+    { id: '/community', label: 'Community', icon: Users },
     { id: '/categories', label: 'Categories', icon: Folder },
     { id: '/study-sets', label: 'Study Sets', icon: BookOpen },
-    { id: '/achievements', label: 'Achievements', icon: Trophy },
+    { id: '/dashboard', label: 'Dashboard', icon: Home },
+    // { id: '/achievements', label: 'Achievements', icon: Trophy },
   ];
 
   const handleNavigation = (path: string) => {
@@ -112,11 +113,11 @@ const Navigation: React.FC = () => {
       <nav className="hidden md:flex bg-white shadow-lg border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 flex items-center">
-                <BookOpen className="h-8 w-8 text-blue-600" />
-                <span className="ml-2 text-xl font-bold text-gray-900">VocabMaster</span>
-              </div>
+            <div className="flex-shrink-0 flex items-center">
+              <BookOpen className="h-8 w-8 text-blue-600" />
+              <span className="ml-2 text-xl font-bold text-gray-900">VocabMaster</span>
+            </div>
+            <div className="flex justify-end items-center">
               <div className="hidden md:flex items-center space-x-8 ml-10">
                 {navItems.map((item) => (
                     <NavItem key={item.id} item={item} isActive={isActive} onClick={handleNavigation} />

@@ -20,6 +20,7 @@ import RegisterPage from './pages/Register';
 import Categories from './pages/Categories';
 import CategoryDetailPage from './pages/CategoryDetail';
 import DictionaryDemo from './components/DictionaryDemo';
+import Community from './pages/Community';
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
                   <Route path="/categories" element={<Categories />} />
                   <Route path="/categories/:id" element={<CategoryDetailPage />} />
                   <Route path="/dictionary" element={<DictionaryDemo />} />
+                  <Route path="/community" element={<Community />} />
                 </Route>
               </Route>
             </Routes>

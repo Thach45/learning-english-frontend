@@ -3,7 +3,7 @@ import { Lightbulb, BookOpen as BookOpenIcon, PlusCircle, Speaker, Tag, RefreshC
 import { AddVocabulary, CefrLevel, PartOfSpeech } from '../../types';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { translateWithTemplate } from '../../utils/translation';
+
 import WebPreviewModal from './WebPreviewModal';
 
 interface AddVocabularyFormProps {
