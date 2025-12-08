@@ -81,10 +81,10 @@ const Navigation: React.FC = () => {
   const { user, logout } = useAuth(); // Get user as well for mobile view
 
   const navItems = [
-    { id: '/community', label: 'Community', icon: Users },
-    { id: '/categories', label: 'Categories', icon: Folder },
-    { id: '/study-sets', label: 'Study Sets', icon: BookOpen },
-    { id: '/dashboard', label: 'Dashboard', icon: Home },
+    { id: '/community', label: 'Cộng đồng', icon: Users },
+    { id: '/vocabularies', label: 'Từ vựng', icon: Folder },
+    // { id: '/study-sets', label: 'Học phần', icon: BookOpen },
+    { id: '/dashboard', label: 'Bảng điều khiển', icon: Home },
     // { id: '/achievements', label: 'Achievements', icon: Trophy },
   ];
 
@@ -111,8 +111,8 @@ const Navigation: React.FC = () => {
     <>
       {/* Desktop Navigation */}
       <nav className="hidden md:flex bg-white shadow-lg border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
+        <div className="max-w-7xl mx-auto px-4 mx-2 sm:px-6 lg:px-8">
+          <div className="flex justify-end h-16">
             <div className="flex-shrink-0 flex items-center">
               <BookOpen className="h-8 w-8 text-blue-600" />
               <span className="ml-2 text-xl font-bold text-gray-900">VocabMaster</span>

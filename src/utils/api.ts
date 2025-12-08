@@ -126,3 +126,61 @@ export async function bulkAddVocabularies(studySetId: string, vocabularies: any[
   return res.data;
 }
 
+// --- Quiz API ---
+
+export interface QuizQuestion {
+  id: string;
+  vocabularyId: string;
+  question: string;
+  options: string[];
+  correctAnswer: string;
+  word: string;
+  pronunciation?: string;
+  definition?: string;
+  example?: string;
+}
+
+export interface QuizAnswer {
+  vocabularyId: string;
+  userAnswer: string;
+}
+
+export interface QuizResult {
+  score: number;
+  correct: number;
+  total: number;
+  message: string;
+  details: Array<{
+    vocabularyId: string;
+    word: string;
+    isCorrect: boolean;
+    userAnswer: string;
+    correctAnswer: string;
+  }>;
+}
+
+export async function generateQuiz(
+  studySetId: string,
+  questionCount?: number,
+  mode?: 'multiple_choice' | 'fill_in_the_blank'
+): Promise<QuizQuestion[]> {
+  const params: any = { studySetId };
+  if (questionCount) params.questionCount = questionCount;
+  if (mode) params.mode = mode;
+
+  const res = await api.get('/quiz/generate', { params });
+  
+  return res.data.data.data;
+}
+
+export async function submitQuiz(
+  studySetId: string,
+  answers: QuizAnswer[]
+): Promise<QuizResult> {
+  const res = await api.post('/quiz/submit', {
+    studySetId,
+    answers,
+  });
+  return res.data.data.data;
+}
+

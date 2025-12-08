@@ -17,10 +17,11 @@ import Achievements from './pages/Achievements';
 import Profile from './pages/Profile';
 import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
-import Categories from './pages/Categories';
+import Categories from './pages/Vocabularies';
 import CategoryDetailPage from './pages/CategoryDetail';
 import DictionaryDemo from './components/DictionaryDemo';
 import Community from './pages/Community';
+import QuizPage from './pages/Quiz';
 
 function App() {
   return (
@@ -43,9 +44,10 @@ function App() {
                   {/* <Route path="/study-sets/create" element={<CreateStudySet />} /> */}
                   <Route path="/study-sets/:id" element={<StudySetDetail />} />
                   <Route path="/learn/:studySetId/flashcards" element={<Learn />} />
+                  <Route path="/learn/quiz" element={<QuizPage />} />
                   <Route path="/achievements" element={<Achievements />} />
                   <Route path="/profile" element={<Profile />} />
-                  <Route path="/categories" element={<Categories />} />
+                  <Route path="/vocabularies" element={<Categories />} />
                   <Route path="/categories/:id" element={<CategoryDetailPage />} />
                   <Route path="/dictionary" element={<DictionaryDemo />} />
                   <Route path="/community" element={<Community />} />

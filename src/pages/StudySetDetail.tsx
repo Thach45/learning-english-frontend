@@ -633,20 +633,20 @@ const StudySetDetail: React.FC = () => {
 
             {creationMode === 'manual' && (
               <div className="relative bg-white rounded-2xl border border-gray-200 p-8 shadow-xl">
-                <button
-                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            <button
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
                   onClick={handleCloseModal}
-                >
+            >
                   <X className="w-5 h-5" />
-                </button>
-                <AddVocabularyForm
-                  newVocab={newVocab}
-                  setNewVocab={setNewVocab}
-                  handleAutoFillVocabulary={handleAutoFillVocabulary}
-                  addLoading={addLoading}
-                  onSubmit={handleAddVocabulary}
-                />
-              </div>
+            </button>
+              <AddVocabularyForm
+                newVocab={newVocab}
+                setNewVocab={setNewVocab}
+                handleAutoFillVocabulary={handleAutoFillVocabulary}
+                addLoading={addLoading}
+                onSubmit={handleAddVocabulary}
+              />
+            </div>
             )}
 
             {creationMode === 'ai' && (
