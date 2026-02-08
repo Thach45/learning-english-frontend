@@ -6,6 +6,8 @@ import {
   CommentPayload,
   LeaderboardUser,
   ReactionType,
+  ListFollowersResponseDto,
+  CheckFollowResponseDto,
 } from '../types/community';
 
 type FeedResponse = {
@@ -81,12 +83,34 @@ export async function fetchLeaderboard() {
 }
 
 /**
- * Optional: follow / unfollow author.
- * Expected backend response:
- * { "data": { userId, isFollowing } }
+ * Follow user (PUT users/:id/follow).
+ * Expected: { "data": { userId, isFollowing: true } }
  */
-export async function toggleFollow(userId: string) {
-  const res = await api.post('/community/follow', { userId });
+export async function followUser(userId: string) {
+  const res = await api.put(`/community/users/${userId}/follow`);
   return unwrap<{ userId: string; isFollowing: boolean }>(res);
+}
+
+/**
+ * Unfollow user (PUT users/:id/unfollow).
+ * Expected: { "data": { userId, isFollowing: false } }
+ */
+export async function unfollowUser(userId: string) {
+  const res = await api.put(`/community/users/${userId}/unfollow`);
+  return unwrap<{ userId: string; isFollowing: boolean }>(res);
+}
+
+export async function listFollowers(page: number, pageSize: number) {
+  const res = await api.get(`/community/list-followers`, { params: { page, pageSize } });
+  return unwrap<ListFollowersResponseDto>(res);
+}
+export async function listFollowering(page: number, pageSize: number) {
+  const res = await api.get(`/community/list-following`, { params: { page, pageSize } });
+  return unwrap<ListFollowersResponseDto>(res);
+}
+
+export async function checkFollow(userId: string) {
+  const res = await api.get(`/community/users/${userId}/check-follow`);
+  return unwrap<CheckFollowResponseDto>(res);
 }
 

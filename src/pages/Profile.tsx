@@ -1,16 +1,19 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { BookOpen, TrendingUp, Star, Trophy } from 'lucide-react';
+import { BookOpen, TrendingUp, Star, Trophy, UserPlus } from 'lucide-react';
 import { useDailyActivityStats, useGamificationStats } from '../hooks/useGamification';
 import XPProgressBar from '../components/gamification/XPProgressBar';
 import StreakCard from '../components/gamification/StreakCard';
-import { useAuth } from '../context/AuthContext';
 import { useGetUser } from '../hooks/useAuthApi';
+import { useCheckFollow, useFollowUser, useUnfollowUser } from '../hooks/useCommunity';
 
 const Profile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { data: user, isLoading: isUserLoading } = useGetUser(id || '');
-
+  const followMutation = useFollowUser();
+  const unfollowMutation = useUnfollowUser();
+  const targetUserId = user?.id ?? id ?? '';
+  const { data: checkFollow, isLoading: checkFollowLoading } = useCheckFollow(targetUserId);  
   const { data: gamificationStats, isLoading: statsLoading } = useGamificationStats(id);
   const { data: dailyActivity, isLoading: dailyLoading } = useDailyActivityStats(id);
 
@@ -57,19 +60,41 @@ const Profile: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header with avatar */}
-      <div className="mb-8 flex items-center gap-4">
-        <div className="relative">
-          <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-blue-500 bg-blue-50 flex items-center justify-center">
-           
+      {/* Header with avatar + nút Theo dõi */}
+      <div className="mb-8 flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-blue-500 bg-blue-50 flex items-center justify-center">
               <img src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} alt={user.name} className="w-full h-full object-cover" />
-            
+            </div>
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-1">{user.name}</h1>
+            <p className="text-gray-600">Personal learning profile</p>
           </div>
         </div>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">{user.name}</h1>
-          <p className="text-gray-600">Personal learning profile</p>
-        </div>
+        {targetUserId && checkFollow?.type !== 'ME' && checkFollow?.type === 'UNFOLLOW' ? (
+          <button
+            type="button"
+            onClick={() => followMutation.mutate(targetUserId)}
+            disabled={followMutation.isPending}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            <UserPlus className="h-4 w-4" />
+            {followMutation.isPending ? 'Đang xử lý...' : 'Theo dõi'}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => unfollowMutation.mutate(targetUserId)}
+            disabled={unfollowMutation.isPending}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-gray-200 text-gray-700 disabled:opacity-50"
+          >
+            <UserPlus className="h-4 w-4" />
+            {unfollowMutation.isPending ? 'Đang xử lý...' : 'Hủy theo dõi'}
+
+          </button>
+        )}
       </div>
 
       {/* Stats Grid */}

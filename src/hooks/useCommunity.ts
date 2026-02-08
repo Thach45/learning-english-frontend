@@ -5,9 +5,13 @@ import {
   reactToPost,
   addComment,
   fetchLeaderboard,
-  toggleFollow,
+  followUser,
+  unfollowUser,
+  checkFollow,
+  listFollowers,
+  listFollowering,
 } from '../services/communityService';
-import { FeedItem, FeedPagination, ReactionType } from '../types/community';
+import { FeedItem, FeedPagination } from '../types/community';
 
 type FeedResponse = {
   items: FeedItem[];
@@ -67,13 +71,48 @@ export function useAddComment() {
   });
 }
 
-export function useToggleFollow() {
+export function useFollowUser() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: toggleFollow,
+    mutationFn: followUser,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['community', 'feed'] });
+      qc.invalidateQueries({ queryKey: ['community', 'check-follow'] });
+      qc.invalidateQueries({ queryKey: ['community', 'list-followers'] });
     },
   });
 }
 
+export function useUnfollowUser() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: unfollowUser,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['community', 'feed'] });
+      qc.invalidateQueries({ queryKey: ['community', 'check-follow'] });
+      qc.invalidateQueries({ queryKey: ['community', 'list-followers'] });
+      qc.invalidateQueries({ queryKey: ['community', 'list-following'] });
+    },
+  });
+}
+
+export function useCheckFollow(userId: string) {
+  return useQuery({
+    queryKey: ['community', 'check-follow', userId],
+    queryFn: () => checkFollow(userId),
+  });
+}
+
+export function useListFollowers(page: number, pageSize: number)  {
+  return useQuery({
+    queryKey: ['community', 'list-followers', page, pageSize],
+    queryFn: () => listFollowers(page, pageSize),
+  });
+}
+
+export function useListFollowing(page: number, pageSize: number)  {
+  return useQuery({
+    queryKey: ['community', 'list-following', page, pageSize],
+    queryFn: () => listFollowering(page, pageSize),
+  });
+}

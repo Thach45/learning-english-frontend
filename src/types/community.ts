@@ -67,5 +67,20 @@ export interface CommentPayload {
   parentCommentId?: string;
 }
 
+export interface ListFollowersResponseDto {
+  items: {
+    id: string;
+    name: string;
+    avatarUrl?: string | null;
+    level?: number;
+  }[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
 export type ReactionType = 'like' | 'love' | 'insight';
 
+export type CheckFollowType = 'FOLLOW' | 'UNFOLLOW' | "ME";
+export interface CheckFollowResponseDto {
+  type: CheckFollowType;
+}
