@@ -1,44 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User } from '../types';
-import { BookOpen, TrendingUp, Star, Trophy, Clock, Zap, Flame } from 'lucide-react';
-import { useGamification } from '../context/GamificationContext';
+import { BookOpen, TrendingUp, Star, Trophy, Clock } from 'lucide-react';
+import { useGamificationStats, useDailyActivityStats, useXPEvents } from '../hooks/useGamification';
 import XPProgressBar from '../components/gamification/XPProgressBar';
 import StreakCard from '../components/gamification/StreakCard';
 import XPEventsList from '../components/gamification/XPEventsList';
-import InProgressAchievements from '../components/dashboard/InProgressAchievements';
 
 const Dashboard: React.FC = () => {
-    const { user, accessToken, refreshToken, login } = useAuth();
+    const { user, isAuthLoading } = useAuth();
     const navigate = useNavigate();
-    const { stats: gamificationStats, dailyActivity, xpEvents, isLoading } = useGamification();
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            if (accessToken && !user) {
-                try {
-                    const response = await fetch('/api/auth/me', {
-                        headers: {
-                            'Authorization': `Bearer ${accessToken}`
-                        }
-                    });
-                    if (response.ok) {
-                        const { data } = await response.json();
-                        login(accessToken, refreshToken ?? null, data as User);
-                    } else {
-                        console.error('Failed to fetch user data');
-                    }
-                } catch (error) {
-                    console.error('Error fetching user data:', error);
-                }
-            }
-        };
+    const userId = user?.id;
+    const { data: gamificationStats, isLoading: statsLoading } = useGamificationStats(userId);
+    const { data: dailyActivity, isLoading: dailyLoading } = useDailyActivityStats(userId);
+    const { data: xpEvents, isLoading: xpLoading } = useXPEvents(userId, 10);
+    const isLoading = statsLoading || dailyLoading || xpLoading;
 
-        fetchUser();
-    }, [accessToken, user, login]);
-
-    if (!user) {
+    if (isAuthLoading || !user) {
         return (
             <div className="flex items-center justify-center h-screen">
                 <p>Loading user information...</p>
@@ -80,11 +59,26 @@ const Dashboard: React.FC = () => {
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Welcome Section */}
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                    Welcome back, {user.name}! 👋
-                </h1>
-                <p className="text-gray-600">Ready to expand your vocabulary today?</p>
+            <div className="mb-8 flex items-center gap-4">
+                <div className="relative">
+                    <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-blue-500 bg-blue-50 flex items-center justify-center">
+                       
+                            <img
+                                src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`}
+                                alt={user.name}
+                                className="w-full h-full object-cover"
+                            />
+                        
+                    </div>
+                </div>
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-1">
+                        Welcome back, {user.name}! 👋
+                    </h1>
+                    <p className="text-gray-600">
+                        Ready to expand your vocabulary today?
+                    </p>
+                </div>
             </div>
 
             {/* Stats Grid */}
@@ -135,11 +129,7 @@ const Dashboard: React.FC = () => {
             <div className="mb-8">
                 <XPEventsList events={xpEvents?.events || []} isLoading={isLoading} />
             </div>
-            {/* In-Progress Achievements */}
-            {/* <div className="mb-8">
-                <InProgressAchievements  />
-            </div> */}
-
+            
             {/* Quick Actions */}
             <div className="grid md:grid-cols-2 gap-6 mb-8">
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">

@@ -37,25 +37,28 @@ export interface XPEventsResponse {
 
 // Gamification API functions
 export const gamificationApi = {
-  // Get user's gamification stats
-  getStats: async (): Promise<GamificationStats> => {
-    const response = await apiClient.get('/gamification/stats');
+  // Get user's gamification stats (optionally for another user)
+  getStats: async (userId?: string): Promise<GamificationStats> => {
+    const params = userId ? { userId } : {};
+    const response = await apiClient.get('/gamification/stats', { params });
     return response.data.data;
   },
 
-  // Get daily activity
-  getDailyActivity: async (date?: string): Promise<DailyActivity> => {
-    const params = date ? { date } : {};
+  // Get daily activity stats (today or specific date) for a user
+  getDailyActivityStats: async (userId?: string, date?: string): Promise<DailyActivity> => {
+    const params: any = {};
+    if (userId) params.userId = userId;
+    if (date) params.date = date;
     const response = await apiClient.get('/gamification/daily-activity-stats', { params });
-   
     return response.data.data;
   },
 
   // Get XP events history
-  getXPEvents: async (limit?: number): Promise<XPEventsResponse> => {
-    const params = limit ? { limit } : {};
+  getXPEvents: async (userId?: string, limit?: number): Promise<XPEventsResponse> => {
+    const params: any = {};
+    if (userId) params.userId = userId;
+    if (limit) params.limit = limit;
     const response = await apiClient.get('/gamification/xp-events', { params });
-
     return response.data.data;
   },
 };

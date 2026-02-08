@@ -9,6 +9,7 @@ import studySetService from '../services/studySetService';
 interface UseStudySetsOptions {
   initialParams?: StudySetQueryParams;
   autoFetch?: boolean;
+  mode?: 'all' | 'enrolled';
 }
 
 interface UseStudySetsReturn {
@@ -29,7 +30,7 @@ interface UseStudySetsReturn {
 }
 
 export function useStudySets(options: UseStudySetsOptions = {}): UseStudySetsReturn {
-  const { initialParams = {}, autoFetch = true } = options;
+  const { initialParams = {}, autoFetch = true, mode = 'all' } = options;
 
   const [studySets, setStudySets] = useState<StudySet[]>([]);
   const [loading, setLoading] = useState(autoFetch);
@@ -45,7 +46,10 @@ export function useStudySets(options: UseStudySetsOptions = {}): UseStudySetsRet
     try {
       setLoading(true);
       setError(null);
-      const response = await studySetService.getAll(params);
+      const response =
+        mode === 'enrolled'
+          ? await studySetService.getEnrolled({ page: params.page, pageSize: params.pageSize })
+          : await studySetService.getAll(params);
       setStudySets(response.studySets);
       setPagination({
         total: response.total,
@@ -58,7 +62,7 @@ export function useStudySets(options: UseStudySetsOptions = {}): UseStudySetsRet
     } finally {
       setLoading(false);
     }
-  }, [params]);
+  }, [params, mode]);
 
   useEffect(() => {
     if (autoFetch) {

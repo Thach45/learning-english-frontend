@@ -15,4 +15,3 @@ export async function analyzeText(text: string) {
   const res = await api.post('/vocabulary/analyze-text', { text });
   return res.data?.data || res.data;
 }
-

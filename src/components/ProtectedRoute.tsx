@@ -3,7 +3,11 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const ProtectedRoute: React.FC = () => {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, isAuthLoading } = useAuth();
+
+    if (isAuthLoading) {
+        return null;
+    }
 
     if (!isAuthenticated) {
         // Redirect them to the /login page, but save the current location they were

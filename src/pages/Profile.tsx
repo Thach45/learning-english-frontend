@@ -1,107 +1,123 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import { BookOpen, TrendingUp, Star, Trophy } from 'lucide-react';
+import { useDailyActivityStats, useGamificationStats } from '../hooks/useGamification';
+import XPProgressBar from '../components/gamification/XPProgressBar';
+import StreakCard from '../components/gamification/StreakCard';
 import { useAuth } from '../context/AuthContext';
+import { useGetUser } from '../hooks/useAuthApi';
 
-const ProfilePage: React.FC = () => {
-    const { user, login, accessToken, refreshToken } = useAuth();
-    const [activeTab, setActiveTab] = useState('profile');
+const Profile: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const { data: user, isLoading: isUserLoading } = useGetUser(id || '');
 
-    // State for profile form
-    const [name, setName] = useState(user?.name || '');
-    const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '');
-    
-    // State for password form
-    const [oldPassword, setOldPassword] = useState('');
-    const [newPassword, setNewPassword] = useState('');
+  const { data: gamificationStats, isLoading: statsLoading } = useGamificationStats(id);
+  const { data: dailyActivity, isLoading: dailyLoading } = useDailyActivityStats(id);
 
-    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const isLoading = isUserLoading || statsLoading || dailyLoading;
 
-    const handleProfileUpdate = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setMessage(null);
-        try {
-            const response = await fetch('/api/users/me', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
-                body: JSON.stringify({ name, avatarUrl }),
-            });
-            const updatedUser = await response.json();
-            if (!response.ok) throw new Error(updatedUser.message || 'Failed to update profile');
-            
-            // Update user in context, keep current refreshToken
-            login(accessToken!, refreshToken ?? null, updatedUser.data);
-            setMessage({ type: 'success', text: 'Profile updated successfully!' });
-        } catch (err: any) {
-            setMessage({ type: 'error', text: err.message });
-        }
-    };
-
-    const handlePasswordChange = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setMessage(null);
-        try {
-            const response = await fetch('/api/users/me/password', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
-                body: JSON.stringify({ oldPassword, newPassword }),
-            });
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.message || 'Failed to change password');
-
-            setMessage({ type: 'success', text: result.message });
-            setOldPassword('');
-            setNewPassword('');
-        } catch (err: any) {
-            setMessage({ type: 'error', text: err.message });
-        }
-    };
-
+  if (isLoading || !user) {
     return (
-        <div className="max-w-4xl mx-auto p-4 md:p-8">
-            <h1 className="text-3xl font-bold mb-6">Your Profile</h1>
-            <div className="flex border-b mb-6">
-                <button onClick={() => setActiveTab('profile')} className={`px-4 py-2 ${activeTab === 'profile' ? 'border-b-2 border-blue-600' : ''}`}>
-                    Edit Profile
-                </button>
-                <button onClick={() => setActiveTab('password')} className={`px-4 py-2 ${activeTab === 'password' ? 'border-b-2 border-blue-600' : ''}`}>
-                    Change Password
-                </button>
-            </div>
-
-            {message && (
-                <div className={`p-4 mb-4 rounded-md ${message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {message.text}
-                </div>
-            )}
-
-            {activeTab === 'profile' && (
-                <form onSubmit={handleProfileUpdate} className="space-y-6">
-                    <div>
-                        <label className="block text-sm font-medium">Name</label>
-                        <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full mt-1 p-2 border rounded-md"/>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">Avatar URL</label>
-                        <input type="text" value={avatarUrl} onChange={e => setAvatarUrl(e.target.value)} className="w-full mt-1 p-2 border rounded-md"/>
-                    </div>
-                    <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md">Update Profile</button>
-                </form>
-            )}
-
-            {activeTab === 'password' && (
-                <form onSubmit={handlePasswordChange} className="space-y-6">
-                    <div>
-                        <label className="block text-sm font-medium">Old Password</label>
-                        <input type="password" value={oldPassword} onChange={e => setOldPassword(e.target.value)} className="w-full mt-1 p-2 border rounded-md"/>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">New Password</label>
-                        <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="w-full mt-1 p-2 border rounded-md"/>
-                    </div>
-                    <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md">Change Password</button>
-                </form>
-            )}
-        </div>
+      <div className="flex items-center justify-center h-screen">
+        <p>Loading profile...</p>
+      </div>
     );
+  }
+
+  const stats = [
+    {
+      label: 'Words Learned',
+      value: gamificationStats?.totalWordsLearned ?? 0,
+      icon: BookOpen,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-100',
+    },
+    {
+      label: 'Current Streak',
+      value: `${gamificationStats?.streak ?? 0} days`,
+      icon: TrendingUp,
+      color: 'text-green-600',
+      bgColor: 'bg-green-100',
+    },
+    {
+      label: 'Level',
+      value: gamificationStats?.level ?? 0,
+      icon: Star,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-100',
+    },
+    {
+      label: 'XP Points',
+      value: gamificationStats?.xp ?? 0,
+      icon: Trophy,
+      color: 'text-yellow-600',
+      bgColor: 'bg-yellow-100',
+    },
+  ];
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Header with avatar */}
+      <div className="mb-8 flex items-center gap-4">
+        <div className="relative">
+          <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-blue-500 bg-blue-50 flex items-center justify-center">
+           
+              <img src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} alt={user.name} className="w-full h-full object-cover" />
+            
+          </div>
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-1">{user.name}</h1>
+          <p className="text-gray-600">Personal learning profile</p>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {stats.map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center">
+                <div className={`p-3 rounded-lg ${stat.bgColor}`}>
+                  <Icon className={`h-6 w-6 ${stat.color}`} />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">{stat.label}</p>
+                  <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Gamification Section (no XP events / quick actions here) */}
+      <div className="grid lg:grid-cols-2 gap-6 mb-8">
+        {/* XP Progress Bar */}
+        {gamificationStats && (
+          <XPProgressBar
+            currentXP={gamificationStats.xp}
+            level={gamificationStats.level}
+            xpForNextLevel={gamificationStats.xpForNextLevel}
+            xpProgress={gamificationStats.xpProgress}
+            isMaxLevel={gamificationStats.isMaxLevel}
+          />
+        )}
+
+        {/* Streak Card */}
+        {dailyActivity && gamificationStats && (
+          <StreakCard
+            streak={gamificationStats.streak}
+            dailyGoal={gamificationStats.dailyGoal}
+            wordsLearned={dailyActivity.wordsLearned}
+            wordsReviewed={dailyActivity.wordsReviewed}
+          />
+        )}
+      </div>
+    </div>
+  );
 };
 
-export default ProfilePage;
+export default Profile;
+

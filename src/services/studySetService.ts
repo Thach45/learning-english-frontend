@@ -77,15 +77,36 @@ export async function toggleLikeStudySet(id: string): Promise<{ liked: boolean; 
   return response.data?.data || response.data;
 }
 
+/**
+ * Enroll current user into a study set (from community).
+ */
+export async function enrollStudySet(id: string): Promise<{ enrolled: boolean }> {
+  const response = await api.post(`${ENDPOINT}/${id}/enroll`);
+  return response.data?.data || response.data;
+}
+
+export async function getEnrolledStudySets(params?: { page?: number; pageSize?: number }): Promise<StudySetsResponse> {
+  const response = await api.get(`${ENDPOINT}/enrolled/me`, { params });
+  const data = response.data?.data || response.data;
+  return {
+    studySets: data?.data || data?.studySets || [],
+    total: data?.total || 0,
+    page: data?.page || 1,
+    pageSize: data?.pageSize || 10,
+  };
+}
+
 // Export all as default object for convenience
 const studySetService = {
   getAll: getStudySets,
+  getEnrolled: getEnrolledStudySets,
   getPopular: getPopularStudySets,
   getById: getStudySetById,
   create: createStudySet,
   update: updateStudySet,
   delete: deleteStudySet,
   toggleLike: toggleLikeStudySet,
+  enroll: enrollStudySet,
 };
 
 export default studySetService;

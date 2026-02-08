@@ -450,7 +450,11 @@ const StudySetDashboard: React.FC = () => {
     createStudySet,
     updateStudySet,
     deleteStudySet,
-  } = useStudySets();
+    setParams,
+  } = useStudySets({
+    initialParams: { page: 1, pageSize: 20 },
+    mode: activeView === 'community' ? 'enrolled' : 'all',
+  });
 
   // Filtered study sets
   const filteredSets = useFilteredStudySets({
