@@ -10,30 +10,46 @@ import {
   checkFollow,
   listFollowers,
   listFollowering,
+  updatePost,
+  deletePost,
 } from '../services/communityService';
-import { FeedItem, FeedPagination } from '../types/community';
+import { FeedItem, FeedPagination, UpdatePostPayload } from '../types/community';
 
 type FeedResponse = {
   items: FeedItem[];
   pagination: FeedPagination;
-};
-
-export const COMMUNITY_KEYS = {
-  feed: (params?: { page?: number; pageSize?: number; filter?: 'all' | 'posts' }) =>
-    ['community', 'feed', params] as const,
-  leaderboard: ['community', 'leaderboard'] as const,
+  isFinished: boolean;
 };
 
 export function useCommunityFeed(params?: { page?: number; pageSize?: number; filter?: 'all' | 'posts' }) {
   return useQuery<FeedResponse>({
-    queryKey: COMMUNITY_KEYS.feed(params),
+    queryKey: ['community', 'feed', params] as const,
     queryFn: () => fetchFeed(params),
   });
 }
 
+export function useUpdatePost(postId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: UpdatePostPayload) => updatePost(postId, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['community', 'feed'] });
+    },
+  });
+}
+
+export function useDeletePost() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: deletePost,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['community', 'feed'] });
+    },
+  });
+}
 export function useLeaderboard() {
   return useQuery({
-    queryKey: COMMUNITY_KEYS.leaderboard,
+    queryKey: ['community', 'leaderboard'] as const,
     queryFn: fetchLeaderboard,
   });
 }

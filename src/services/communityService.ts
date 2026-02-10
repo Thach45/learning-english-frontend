@@ -5,14 +5,17 @@ import {
   CreatePostPayload,
   CommentPayload,
   LeaderboardUser,
-  ReactionType,
+  
   ListFollowersResponseDto,
   CheckFollowResponseDto,
+  UpdatePostPayload,
+  UpdatePostResponseDto,
 } from '../types/community';
 
 type FeedResponse = {
   items: FeedItem[];
   pagination: FeedPagination;
+  isFinished: boolean;
 };
 
 const unwrap = <T>(res: any): T => (res?.data?.data.data ? res.data.data.data : res.data.data);
@@ -114,3 +117,12 @@ export async function checkFollow(userId: string) {
   return unwrap<CheckFollowResponseDto>(res);
 }
 
+export async function updatePost(postId: string, payload: UpdatePostPayload) {
+  const res = await api.put(`/community/posts/${postId}`, payload);
+  return unwrap<UpdatePostResponseDto>(res);
+}
+
+export async function deletePost(postId: string) {
+  const res = await api.delete(`/community/posts/${postId}`);
+  return unwrap<{ message: string }>(res);
+}

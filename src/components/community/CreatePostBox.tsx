@@ -1,22 +1,16 @@
 import React, { useState } from 'react';
 import { BookOpen, Image, Send, X } from 'lucide-react';
 import { StudySet } from '../../types/studySet';
+import { User } from '../../types';
+import StudySetPickerModal from './StudySetPickerModal';
 
 type Privacy = 'PUBLIC' | 'FOLLOWERS_ONLY' | 'PRIVATE';
 
-interface CurrentUser {
-  id: string;
-  name: string;
-  avatarUrl: string;
-  level: number;
-}
 
 interface CreatePostBoxProps {
-  currentUser: CurrentUser;
-  myStudySets: StudySet[];
+  currentUser: User;
   onPost: (payload: { content: string; privacy: Privacy; type: string; sharedStudySetId?: string }) => Promise<void>;
   isSubmitting?: boolean;
-  selectedStudySet?: StudySet | null;
 }
 
 const PRIVACY_MAP: { value: Privacy; label: string }[] = [
@@ -25,7 +19,7 @@ const PRIVACY_MAP: { value: Privacy; label: string }[] = [
   { value: 'PRIVATE', label: 'Riêng tư' },
 ];
 
-const CreatePostBox: React.FC<CreatePostBoxProps> = ({ currentUser, myStudySets, onPost, isSubmitting }) => {
+const CreatePostBox: React.FC<CreatePostBoxProps> = ({ currentUser, onPost, isSubmitting }) => {
   const [content, setContent] = useState('');
   const [privacy, setPrivacy] = useState<Privacy>('PUBLIC');
   const [selectedStudySet, setSelectedStudySet] = useState<StudySet | null>(null);
@@ -47,7 +41,7 @@ const CreatePostBox: React.FC<CreatePostBoxProps> = ({ currentUser, myStudySets,
     <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
       <div className="flex gap-3">
         <img
-          src={currentUser.avatarUrl}
+          src={currentUser.avatarUrl ?? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + currentUser.name}
           alt={currentUser.name}
           className="w-10 h-10 rounded-full bg-indigo-50"
         />
@@ -132,52 +126,15 @@ const CreatePostBox: React.FC<CreatePostBoxProps> = ({ currentUser, myStudySets,
         </div>
 
       {/* Study set picker modal */}
-      {isPickerOpen && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-lg border border-gray-200 max-h-[80vh] flex flex-col">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-900">Chọn bộ từ vựng để chia sẻ</h3>
-              <button
-                type="button"
-                className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full"
-                onClick={() => setIsPickerOpen(false)}
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="px-4 py-3 text-xs text-gray-500 border-b border-gray-50">
-              Chỉ hiển thị các bộ từ vựng của bạn. Chọn một bộ để gắn vào bài viết.
-            </div>
-            <div className="flex-1 overflow-y-auto px-2 py-2 space-y-2">
-              {myStudySets.length === 0 && (
-                <div className="text-xs text-gray-500 text-center py-6">
-                  Bạn chưa có bộ từ vựng nào. Hãy tạo một bộ trong trang Học tập trước.
-                </div>
-              )}
-              {myStudySets.map((set: StudySet) => (
-                <button
-                  key={set.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedStudySet(set);
-                    setIsPickerOpen(false);
-                  }}
-                  className={`w-full text-left px-3 py-2 rounded-xl border text-xs transition-colors ${
-                    selectedStudySet?.id === set.id
-                      ? 'border-indigo-500 bg-indigo-50'
-                      : 'border-gray-100 hover:border-indigo-200 hover:bg-indigo-50/40'
-                  }`}
-                >
-                  <div className="font-semibold text-gray-900 line-clamp-1">{set.title}</div>
-                  <div className="text-[11px] text-gray-500 mt-0.5 line-clamp-1">
-                    {set.vocabularyCount} thuật ngữ • {set.isPublic ? 'Công khai' : 'Riêng tư'}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      <StudySetPickerModal
+        isOpen={isPickerOpen}
+        onClose={() => setIsPickerOpen(false)}
+        selectedId={selectedStudySet?.id}
+        onSelect={(set) => {
+          setSelectedStudySet(set);
+          setIsPickerOpen(false);
+        }}
+      />
     </div>
   );
 };

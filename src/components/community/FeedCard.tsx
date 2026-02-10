@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { BookOpen, ExternalLink, Heart, MessageSquare, MoreHorizontal, Users } from 'lucide-react';
+import React, { useRef, useState, useEffect } from 'react';
+import { BookOpen, ExternalLink, Heart, MessageSquare, MoreHorizontal, Users, Pencil, Trash2 } from 'lucide-react';
 import { FeedItem } from '../../types/community';
-import { useReactPost } from '../../hooks/useCommunity';
+import { useReactPost, useDeletePost } from '../../hooks/useCommunity';
 import studySetService from '../../services/studySetService';
+import EditPostModal from './EditPostModal';
 
 interface FeedCardProps {
   item: FeedItem;
@@ -10,10 +11,25 @@ interface FeedCardProps {
 
 const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
   const { mutateAsync: reactToPost } = useReactPost();
+  const deleteMutation = useDeletePost();
   const [likes, setLikes] = useState(item.likes);
   const [isLiked, setIsLiked] = useState<boolean>(!!item.isLiked);
   const [isEnrolled, setIsEnrolled] = useState<boolean>(!!item.studySet?.isEnrolled);
   const [learners, setLearners] = useState<number>(item.studySet?.learnersCount ?? 0);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Đóng menu khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    if (menuOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [menuOpen]);
 
   const handleToggleLike = async () => {
     const currentLikes = likes;
@@ -74,9 +90,41 @@ const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                 {item.type === 'post' || item.type === 'study_set_shared' ? 'đã đăng bài viết' : item.content}
               </span>
             </div>
-            <button className="text-gray-400 hover:text-gray-600 p-1">
-              <MoreHorizontal className="w-4 h-4" />
-            </button>
+            
+            {item.user.isAuthor && (
+              <div className="relative" ref={menuRef}>
+                <button
+                  className="text-gray-400 hover:text-gray-600 p-1"
+                  onClick={() => setMenuOpen((v) => !v)}
+                >
+                  <MoreHorizontal className="w-4 h-4" />
+                </button>
+                {menuOpen && (
+                  <div className="absolute right-0 top-8 z-20 w-36 bg-white border border-gray-200 rounded-xl shadow-lg py-1">
+                    <button
+                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setEditModalOpen(true);
+                      }}
+                    >
+                      <Pencil className="w-4 h-4" /> Sửa bài
+                    </button>
+                    <button
+                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        if (window.confirm('Bạn có chắc muốn xoá bài viết này?')) {
+                          deleteMutation.mutate(item.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" /> Xoá bài
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           <span className="text-xs text-gray-400 block mt-0.5">{item.timestamp}</span>
         </div>
@@ -90,6 +138,7 @@ const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
         )}
 
         {/* Study Set Attachment */}
+       
         {item.studySet && (
           <div className="mt-3 mb-3 border border-gray-200 rounded-xl p-4 bg-gray-50 hover:bg-indigo-50/30 transition-colors cursor-pointer group/card shadow-sm">
             <div className="flex items-start justify-between">
@@ -163,6 +212,16 @@ const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
           </button>
         </div>
       </div>
+
+      {/* Edit Modal */}
+      <EditPostModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        postId={item.id}
+        initialContent={item.content}
+        postType={item.type}
+        currentStudySet={item.studySet}
+      />
     </div>
   );
 };

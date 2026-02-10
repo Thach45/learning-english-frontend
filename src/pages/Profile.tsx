@@ -13,7 +13,7 @@ const Profile: React.FC = () => {
   const followMutation = useFollowUser();
   const unfollowMutation = useUnfollowUser();
   const targetUserId = user?.id ?? id ?? '';
-  const { data: checkFollow, isLoading: checkFollowLoading } = useCheckFollow(targetUserId);  
+  const { data: checkFollow } = useCheckFollow(targetUserId);  
   const { data: gamificationStats, isLoading: statsLoading } = useGamificationStats(id);
   const { data: dailyActivity, isLoading: dailyLoading } = useDailyActivityStats(id);
 
@@ -73,27 +73,31 @@ const Profile: React.FC = () => {
             <p className="text-gray-600">Personal learning profile</p>
           </div>
         </div>
-        {targetUserId && checkFollow?.type !== 'ME' && checkFollow?.type === 'UNFOLLOW' ? (
-          <button
-            type="button"
-            onClick={() => followMutation.mutate(targetUserId)}
-            disabled={followMutation.isPending}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
-          >
-            <UserPlus className="h-4 w-4" />
-            {followMutation.isPending ? 'Đang xử lý...' : 'Theo dõi'}
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => unfollowMutation.mutate(targetUserId)}
-            disabled={unfollowMutation.isPending}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-gray-200 text-gray-700 disabled:opacity-50"
-          >
-            <UserPlus className="h-4 w-4" />
-            {unfollowMutation.isPending ? 'Đang xử lý...' : 'Hủy theo dõi'}
+        {checkFollow?.type !== 'ME' && (
+          <div>
+            {targetUserId  && checkFollow?.type === 'UNFOLLOW' ? (
+              <button
+                type="button"
+                onClick={() => followMutation.mutate(targetUserId)}
+                disabled={followMutation.isPending}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                <UserPlus className="h-4 w-4" />
+                {followMutation.isPending ? 'Đang xử lý...' : 'Theo dõi'}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => unfollowMutation.mutate(targetUserId)}
+                disabled={unfollowMutation.isPending}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-gray-200 text-gray-700 disabled:opacity-50"
+              >
+                <UserPlus className="h-4 w-4" />
+                {unfollowMutation.isPending ? 'Đang xử lý...' : 'Hủy theo dõi'}
 
-          </button>
+              </button>
+            )}
+          </div>
         )}
       </div>
 

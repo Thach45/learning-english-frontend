@@ -5,6 +5,7 @@ export interface FeedUser {
   name: string;
   avatarUrl?: string;
   level?: number;
+  isAuthor?: boolean;
 }
 
 export interface FeedAttachmentStudySet {
@@ -34,6 +35,7 @@ export interface FeedItem {
   comments: number;
   isLiked?: boolean;
   isSaved?: boolean;
+
 }
 
 export interface FeedPagination {
@@ -83,4 +85,13 @@ export type ReactionType = 'like' | 'love' | 'insight';
 export type CheckFollowType = 'FOLLOW' | 'UNFOLLOW' | "ME";
 export interface CheckFollowResponseDto {
   type: CheckFollowType;
+}
+export type UpdatePostPayload  ={
+  content?: string;
+  imageUrls?: string[];
+  sharedStudySetId?: string;
+  privacy?: 'PUBLIC' | 'FOLLOWERS_ONLY' | 'PRIVATE';
+ }
+export type UpdatePostResponseDto = {
+  message: string;
 }
