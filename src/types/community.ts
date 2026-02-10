@@ -95,3 +95,30 @@ export type UpdatePostPayload  ={
 export type UpdatePostResponseDto = {
   message: string;
 }
+
+export interface CommentUser {
+  id: string;
+  name: string;
+  avatarUrl?: string;
+  level?: number;
+}
+
+export interface Comment {
+  id: string;
+  content: string;
+  postId: string;
+  author: CommentUser;
+  createdAt: string;
+  updatedAt: string;
+  isAuthor: boolean;
+}
+
+export interface GetCommentsResponse {
+  items: Comment[];
+  pagination: FeedPagination;
+}
+
+export interface DeleteCommentResponse {
+  message: string;
+  commentsCount: number;
+}

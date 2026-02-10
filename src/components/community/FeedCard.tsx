@@ -4,12 +4,14 @@ import { FeedItem } from '../../types/community';
 import { useReactPost, useDeletePost } from '../../hooks/useCommunity';
 import studySetService from '../../services/studySetService';
 import EditPostModal from './EditPostModal';
+import CommentList from './CommentList';
 
 interface FeedCardProps {
   item: FeedItem;
+  currentUserId?: string;
 }
 
-const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
+const FeedCard: React.FC<FeedCardProps> = ({ item, currentUserId }) => {
   const { mutateAsync: reactToPost } = useReactPost();
   const deleteMutation = useDeletePost();
   const [likes, setLikes] = useState(item.likes);
@@ -18,7 +20,14 @@ const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
   const [learners, setLearners] = useState<number>(item.studySet?.learnersCount ?? 0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [showComments, setShowComments] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Sync likes state with props when feed updates (e.g. comment count changed)
+  useEffect(() => {
+    setLikes(item.likes);
+    setIsLiked(!!item.isLiked);
+  }, [item.likes, item.isLiked]);
 
   // Đóng menu khi click ra ngoài
   useEffect(() => {
@@ -204,13 +213,25 @@ const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
             </div>
             {likes}
           </button>
-          <button className="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-indigo-600 transition-colors group">
-            <div className="p-1.5 rounded-full group-hover:bg-indigo-50">
+          <button 
+            onClick={() => setShowComments(!showComments)}
+            className="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-indigo-600 transition-colors group"
+          >
+            <div className={`p-1.5 rounded-full group-hover:bg-indigo-50 ${showComments ? 'bg-indigo-50 text-indigo-600' : ''}`}>
               <MessageSquare className="w-4 h-4" />
             </div>
             {item.comments}
           </button>
         </div>
+
+        {/* Comment Section */}
+        {showComments && (
+          <CommentList 
+            postId={item.id} 
+            postAuthorId={item.user.id}
+            currentUserId={currentUserId}
+          />
+        )}
       </div>
 
       {/* Edit Modal */}

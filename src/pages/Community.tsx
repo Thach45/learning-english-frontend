@@ -27,7 +27,7 @@ const UserProgressDashboard: React.FC = () => {
   const { data: user } = useMe();
 
   // Hook gọi ở top level — khi page thay đổi, query key đổi → tự fetch trang mới
-  const { data: feedData, isLoading: feedLoading } = useCommunityFeed({ page, pageSize: 5, filter });
+  const { data: feedData, isLoading: feedLoading } = useCommunityFeed({ page, pageSize: 20, filter });
 
   // Append items khi có data mới + dùng isFinished từ backend
   useEffect(() => {
@@ -160,7 +160,7 @@ const UserProgressDashboard: React.FC = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
                     >
-                      <FeedCard item={item} />
+                      <FeedCard item={item} currentUserId={user?.id} />
                     </motion.div>
                   ))}
                 {!isFinished && (

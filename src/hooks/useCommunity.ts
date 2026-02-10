@@ -12,8 +12,12 @@ import {
   listFollowering,
   updatePost,
   deletePost,
+  fetchComments,
+  updateComment,
+  deleteComment,
 } from '../services/communityService';
 import { FeedItem, FeedPagination, UpdatePostPayload } from '../types/community';
+import { useNotification } from '../context/NotificationContext';
 
 type FeedResponse = {
   items: FeedItem[];
@@ -40,10 +44,12 @@ export function useUpdatePost(postId: string) {
 
 export function useDeletePost() {
   const qc = useQueryClient();
+  const { addNotification } = useNotification();
   return useMutation({
     mutationFn: deletePost,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['community', 'feed'] });
+      addNotification({ type: 'success', title: 'Thành công', message: 'Đã xoá bài viết' });
     },
   });
 }
@@ -56,22 +62,26 @@ export function useLeaderboard() {
 
 export function useCreatePost() {
   const qc = useQueryClient();
+  const { addNotification } = useNotification();
   return useMutation({
     mutationFn: createPost,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['community', 'feed'] });
+      addNotification({ type: 'success', title: 'Thành công', message: 'Đã tạo bài viết' });
     },
   });
 }
 
 export function useReactPost() {
   const qc = useQueryClient();
+  const { addNotification } = useNotification();
   return useMutation({
     mutationFn: (postId: string) =>
       reactToPost(postId),
     onSuccess: (res) => {
       // optimistic invalidation
       qc.invalidateQueries({ queryKey: ['community', 'feed'] });
+      addNotification({ type: 'success', title: 'Thành công', message: 'Đã thích bài viết' });
       return res;
     },
   });
@@ -79,10 +89,50 @@ export function useReactPost() {
 
 export function useAddComment() {
   const qc = useQueryClient();
+  const { addNotification } = useNotification();
   return useMutation({
     mutationFn: addComment,
-    onSuccess: () => {
+    onSuccess: (res) => {
+      // Invalidate feed to update comment count
       qc.invalidateQueries({ queryKey: ['community', 'feed'] });
+      // Invalidate specific post comments
+      qc.invalidateQueries({ queryKey: ['community', 'comments', res.postId] });
+      addNotification({ type: 'success', title: 'Thành công', message: 'Đã thêm bình luận' });
+    },
+  });
+}
+
+export function useComments(postId: string, page = 1, pageSize = 20) {
+  return useQuery({
+    queryKey: ['community', 'comments', postId, page, pageSize],
+    queryFn: () => fetchComments(postId, page, pageSize),
+    enabled: !!postId,
+  });
+}
+
+export function useUpdateComment() {
+  const qc = useQueryClient();
+  const { addNotification } = useNotification();
+  return useMutation({
+    mutationFn: ({ id, content }: { id: string; content: string }) => 
+      updateComment(id, content),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ['community', 'comments', res.postId] });
+      addNotification({ type: 'success', title: 'Thành công', message: 'Đã sửa bình luận' });
+    },
+  });
+}
+
+export function useDeleteComment() {
+  const qc = useQueryClient();
+  const { addNotification } = useNotification();
+  return useMutation({
+    mutationFn: ({ id }: { id: string; postId: string }) => 
+      deleteComment(id),
+    onSuccess: (_, variables) => {
+      qc.invalidateQueries({ queryKey: ['community', 'feed'] });
+      qc.invalidateQueries({ queryKey: ['community', 'comments', variables.postId] });
+      addNotification({ type: 'success', title: 'Thành công', message: 'Đã xoá bình luận' });
     },
   });
 }

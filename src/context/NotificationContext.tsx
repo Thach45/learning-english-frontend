@@ -1,69 +1,63 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  CheckCircle, 
-  XCircle, 
-  AlertTriangle, 
-  Info, 
+import {
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  Info,
   X,
-  Bell,
-  Star,
+  Trophy,
   Zap,
-  Trophy
+  Sparkles,
 } from 'lucide-react';
 
-// Notification types
+// ─── Types ───────────────────────────────────────────────────────────
 export type NotificationType = 'success' | 'error' | 'warning' | 'info' | 'achievement' | 'xp';
 
-// Notification interface
-export interface NotificationItem {
+export interface NotificationItemType {
   id: string;
   type: NotificationType;
   title: string;
   message: string;
   duration?: number;
-  action?: {
-    label: string;
-    onClick: () => void;
-  };
+  action?: { label: string; onClick: () => void };
   icon?: React.ReactNode;
   autoClose?: boolean;
 }
 
-// Notification context
 interface NotificationContextType {
-  notifications: NotificationItem[];
-  addNotification: (notification: Omit<NotificationItem, 'id'>) => void;
+  notifications: NotificationItemType[];
+  addNotification: (notification: Omit<NotificationItemType, 'id'>) => void;
   removeNotification: (id: string) => void;
   clearAll: () => void;
 }
 
 const NotificationContext = React.createContext<NotificationContextType | undefined>(undefined);
 
-// Notification Provider
+// ─── Provider ────────────────────────────────────────────────────────
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [notifications, setNotifications] = useState<NotificationItemType[]>([]);
 
-  const addNotification = (notification: Omit<NotificationItem, 'id'>) => {
-    const id = Date.now().toString();
-    const newNotification = { ...notification, id };
-    setNotifications(prev => [...prev, newNotification]);
+  const addNotification = (notification: Omit<NotificationItemType, 'id'>) => {
+    const id = Date.now().toString() + Math.random().toString(36).slice(2, 6);
+    const duration = notification.duration ?? 4000;
+    const item = { ...notification, id, duration };
 
-    // Auto close if enabled
+    setNotifications((prev) => {
+      const next = [...prev, item];
+      return next.length > 4 ? next.slice(-4) : next;
+    });
+
     if (notification.autoClose !== false) {
-      setTimeout(() => {
-        removeNotification(id);
-      }, notification.duration || 5000);
+      setTimeout(() => removeNotification(id), duration);
     }
   };
 
   const removeNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
-  const clearAll = () => {
-    setNotifications([]);
-  };
+  const clearAll = () => setNotifications([]);
 
   return (
     <NotificationContext.Provider value={{ notifications, addNotification, removeNotification, clearAll }}>
@@ -73,183 +67,168 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   );
 };
 
-// Hook to use notifications
 export const useNotification = () => {
-  const context = React.useContext(NotificationContext);
-  if (!context) {
-    throw new Error('useNotification must be used within NotificationProvider');
-  }
-  return context;
+  const ctx = React.useContext(NotificationContext);
+  if (!ctx) throw new Error('useNotification must be used within NotificationProvider');
+  return ctx;
 };
 
-// Individual notification component
-const NotificationItem: React.FC<{ notification: NotificationItem; onRemove: (id: string) => void }> = ({ 
-  notification, 
-  onRemove 
-}) => {
-  const getIcon = () => {
-    if (notification.icon) return notification.icon;
-    
-    switch (notification.type) {
-      case 'success':
-        return <CheckCircle className="w-5 h-5" />;
-      case 'error':
-        return <XCircle className="w-5 h-5" />;
-      case 'warning':
-        return <AlertTriangle className="w-5 h-5" />;
-      case 'info':
-        return <Info className="w-5 h-5" />;
-      case 'achievement':
-        return <Trophy className="w-5 h-5" />;
-      case 'xp':
-        return <Zap className="w-5 h-5" />;
-      default:
-        return <Bell className="w-5 h-5" />;
-    }
-  };
+// ─── Style config ────────────────────────────────────────────────────
+const STYLE_MAP: Record<
+  NotificationType,
+  { icon: React.ReactNode; accent: string; bg: string; ring: string; progress: string }
+> = {
+  success: {
+    icon: <CheckCircle2 className="w-5 h-5 text-emerald-600" />,
+    accent: 'text-emerald-600',
+    bg: 'bg-emerald-50',
+    ring: 'ring-emerald-100',
+    progress: 'bg-emerald-500',
+  },
+  error: {
+    icon: <XCircle className="w-5 h-5 text-rose-600" />,
+    accent: 'text-rose-600',
+    bg: 'bg-rose-50',
+    ring: 'ring-rose-100',
+    progress: 'bg-rose-500',
+  },
+  warning: {
+    icon: <AlertTriangle className="w-5 h-5 text-amber-600" />,
+    accent: 'text-amber-600',
+    bg: 'bg-amber-50',
+    ring: 'ring-amber-100',
+    progress: 'bg-amber-500',
+  },
+  info: {
+    icon: <Info className="w-5 h-5 text-indigo-600" />,
+    accent: 'text-indigo-600',
+    bg: 'bg-indigo-50',
+    ring: 'ring-indigo-100',
+    progress: 'bg-indigo-500',
+  },
+  achievement: {
+    icon: <Trophy className="w-5 h-5 text-purple-600" />,
+    accent: 'text-purple-600',
+    bg: 'bg-purple-50',
+    ring: 'ring-purple-200',
+    progress: 'bg-gradient-to-r from-purple-500 to-indigo-500',
+  },
+  xp: {
+    icon: <Zap className="w-5 h-5 text-amber-500 fill-amber-500" />,
+    accent: 'text-amber-600',
+    bg: 'bg-amber-50',
+    ring: 'ring-amber-200',
+    progress: 'bg-gradient-to-r from-amber-400 to-orange-500',
+  },
+};
 
-  const getColors = () => {
-    switch (notification.type) {
-      case 'success':
-        return {
-          bg: 'bg-green-50 border-green-200',
-          text: 'text-green-800',
-          icon: 'text-green-500',
-          close: 'text-green-400 hover:text-green-600'
-        };
-      case 'error':
-        return {
-          bg: 'bg-red-50 border-red-200',
-          text: 'text-red-800',
-          icon: 'text-red-500',
-          close: 'text-red-400 hover:text-red-600'
-        };
-      case 'warning':
-        return {
-          bg: 'bg-yellow-50 border-yellow-200',
-          text: 'text-yellow-800',
-          icon: 'text-yellow-500',
-          close: 'text-yellow-400 hover:text-yellow-600'
-        };
-      case 'info':
-        return {
-          bg: 'bg-blue-50 border-blue-200',
-          text: 'text-blue-800',
-          icon: 'text-blue-500',
-          close: 'text-blue-400 hover:text-blue-600'
-        };
-      case 'achievement':
-        return {
-          bg: 'bg-purple-50 border-purple-200',
-          text: 'text-purple-800',
-          icon: 'text-purple-500',
-          close: 'text-purple-400 hover:text-purple-600'
-        };
-      case 'xp':
-        return {
-          bg: 'bg-orange-50 border-orange-200',
-          text: 'text-orange-800',
-          icon: 'text-orange-500',
-          close: 'text-orange-400 hover:text-orange-600'
-        };
-      default:
-        return {
-          bg: 'bg-gray-50 border-gray-200',
-          text: 'text-gray-800',
-          icon: 'text-gray-500',
-          close: 'text-gray-400 hover:text-gray-600'
-        };
-    }
-  };
-
-  const colors = getColors();
+// ─── Notification Card ───────────────────────────────────────────────
+const NotificationCard: React.FC<{
+  notification: NotificationItemType;
+  onRemove: (id: string) => void;
+}> = ({ notification, onRemove }) => {
+  const s = STYLE_MAP[notification.type] ?? STYLE_MAP.info;
+  const isSpecial = notification.type === 'achievement' || notification.type === 'xp';
 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: -50, scale: 0.9 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -50, scale: 0.9 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      className={`relative p-4 border rounded-lg shadow-lg max-w-sm w-full ${colors.bg}`}
+      initial={{ opacity: 0, x: 80, scale: 0.92 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
+      exit={{ opacity: 0, x: 40, scale: 0.92, transition: { duration: 0.2 } }}
+      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+      className={`
+        relative w-full overflow-hidden rounded-2xl bg-white pointer-events-auto
+        border border-gray-100 shadow-lg
+        ${isSpecial ? `ring-1 ${s.ring}` : ''}
+      `}
     >
-      <div className="flex items-start space-x-3">
-        <div className={`flex-shrink-0 ${colors.icon}`}>
-          {getIcon()}
-        </div>
-        
-        <div className="flex-1 min-w-0">
-          <h4 className={`text-sm font-medium ${colors.text}`}>
-            {notification.title}
-          </h4>
-          <p className={`text-sm mt-1 ${colors.text} opacity-90`}>
+      {/* Decorative glow cho achievement / xp */}
+      {isSpecial && (
+        <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full opacity-[0.07] blur-2xl bg-gradient-to-br from-purple-500 to-indigo-500 pointer-events-none" />
+      )}
+
+      <div className="flex items-start gap-3 p-3.5">
+        {/* Icon */}
+        {/* <div className={`flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-xl ${s.bg}`}>
+          {notification.icon ?? s.icon}
+        </div> */}
+
+        {/* Content */}
+        <div className="flex-1 min-w-0 pt-0.5">
+          <div className="flex items-center gap-1.5">
+            <h4 className="text-sm font-bold text-gray-900 truncate leading-5">
+              {notification.title}
+            </h4>
+            {notification.type === 'achievement' && (
+              <Sparkles className="w-3.5 h-3.5 text-purple-500 flex-shrink-0" />
+            )}
+          </div>
+          <p className="mt-0.5 text-xs text-gray-500 leading-relaxed line-clamp-2">
             {notification.message}
           </p>
-          
+
           {notification.action && (
             <button
               onClick={notification.action.onClick}
-              className={`mt-2 text-xs font-medium ${colors.text} hover:opacity-80 transition-opacity`}
+              className="mt-2 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
             >
-              {notification.action.label}
+              {notification.action.label} &rarr;
             </button>
           )}
         </div>
-        
+
+        {/* Close */}
         <button
           onClick={() => onRemove(notification.id)}
-          className={`flex-shrink-0 ${colors.close} transition-colors`}
+          className="flex-shrink-0 p-1 -mt-0.5 -mr-1 text-gray-300 hover:text-gray-500 hover:bg-gray-50 rounded-lg transition-colors"
         >
-          <X className="w-4 h-4" />
+          <X className="w-3.5 h-3.5" />
         </button>
       </div>
+
+      {/* Progress bar */}
+      {notification.autoClose !== false && (
+        <div className="h-[3px] w-full bg-gray-50">
+          <motion.div
+            initial={{ width: '100%' }}
+            animate={{ width: '0%' }}
+            transition={{ duration: (notification.duration ?? 4000) / 1000, ease: 'linear' }}
+            className={`h-full rounded-full ${s.progress}`}
+          />
+        </div>
+      )}
     </motion.div>
   );
 };
 
-// Notification container
+// ─── Container ───────────────────────────────────────────────────────
 const NotificationContainer: React.FC = () => {
   const { notifications, removeNotification } = useNotification();
 
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
+    <div className="fixed top-0 right-0 z-[9999] p-4 sm:p-5 flex flex-col gap-2.5 w-full max-w-[380px] pointer-events-none">
       <AnimatePresence mode="popLayout">
-        {notifications.map(notification => (
-          <NotificationItem
-            key={notification.id}
-            notification={notification}
-            onRemove={removeNotification}
-          />
+        {notifications.map((n) => (
+          <NotificationCard key={n.id} notification={n} onRemove={removeNotification} />
         ))}
       </AnimatePresence>
     </div>
   );
 };
 
-// Quick notification helpers
-export const showSuccess = (title: string, message: string, duration?: number) => {
-  // This will be used with useNotification hook
-  return { type: 'success' as const, title, message, duration };
-};
+// ─── Helpers ─────────────────────────────────────────────────────────
+export const showSuccess = (title: string, message: string, duration?: number) =>
+  ({ type: 'success' as const, title, message, duration });
+export const showError = (title: string, message: string, duration?: number) =>
+  ({ type: 'error' as const, title, message, duration });
+export const showWarning = (title: string, message: string, duration?: number) =>
+  ({ type: 'warning' as const, title, message, duration });
+export const showInfo = (title: string, message: string, duration?: number) =>
+  ({ type: 'info' as const, title, message, duration });
+export const showAchievement = (title: string, message: string, duration?: number) =>
+  ({ type: 'achievement' as const, title, message, duration });
+export const showXP = (title: string, message: string, duration?: number) =>
+  ({ type: 'xp' as const, title, message, duration });
 
-export const showError = (title: string, message: string, duration?: number) => {
-  return { type: 'error' as const, title, message, duration };
-};
-
-export const showWarning = (title: string, message: string, duration?: number) => {
-  return { type: 'warning' as const, title, message, duration };
-};
-
-export const showInfo = (title: string, message: string, duration?: number) => {
-  return { type: 'info' as const, title, message, duration };
-};
-
-export const showAchievement = (title: string, message: string, duration?: number) => {
-  return { type: 'achievement' as const, title, message, duration };
-};
-
-export const showXP = (title: string, message: string, duration?: number) => {
-  return { type: 'xp' as const, title, message, duration };
-};
-
-export default NotificationProvider; 
+export default NotificationProvider;

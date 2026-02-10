@@ -5,6 +5,9 @@ import {
   CreatePostPayload,
   CommentPayload,
   LeaderboardUser,
+  Comment,
+  GetCommentsResponse,
+  DeleteCommentResponse,
   
   ListFollowersResponseDto,
   CheckFollowResponseDto,
@@ -63,15 +66,31 @@ export async function reactToPost(postId: string) {
 /**
  * Expected backend response:
  * {
- *   "data": { postId, comments }
+ *   "data": Comment
  * }
  */
 export async function addComment(payload: CommentPayload) {
   const res = await api.post(`/community/posts/${payload.postId}/comments`, {
     content: payload.content,
-    parentCommentId: payload.parentCommentId,
   });
-  return unwrap<{ postId: string; comments: number }>(res);
+  return unwrap<Comment>(res);
+}
+
+export async function fetchComments(postId: string, page = 1, pageSize = 20) {
+  const res = await api.get(`/community/posts/${postId}/comments`, {
+    params: { page, pageSize },
+  });
+  return unwrap<GetCommentsResponse>(res);
+}
+
+export async function updateComment(commentId: string, content: string) {
+  const res = await api.put(`/community/comments/${commentId}`, { content });
+  return unwrap<Comment>(res);
+}
+
+export async function deleteComment(commentId: string) {
+  const res = await api.delete(`/community/comments/${commentId}`);
+  return unwrap<DeleteCommentResponse>(res);
 }
 
 /**
