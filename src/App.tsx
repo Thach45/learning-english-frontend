@@ -28,6 +28,7 @@ import AdminOverview from './pages/admin/AdminOverview';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminPosts from './pages/admin/AdminPosts';
 import AdminComments from './pages/admin/AdminComments';
+import AdminRoles from './pages/admin/AdminRoles';
 
 function App() {
   return (
@@ -63,6 +64,7 @@ function App() {
                       <Route path="users" element={<AdminUsers />} />
                       <Route path="posts" element={<AdminPosts />} />
                       <Route path="comments" element={<AdminComments />} />
+                      <Route path="roles" element={<AdminRoles />} />
                     </Route>
                   </Route>
                 </Route>

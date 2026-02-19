@@ -24,6 +24,9 @@ const AdminLayout: React.FC = () => {
           <NavLink to="/admin/comments" className={navClass}>
             Comment
           </NavLink>
+          <NavLink to="/admin/roles" className={navClass}>
+            Role & Permission
+          </NavLink>
         </nav>
       </aside>
       <main className="flex-1 p-6 overflow-auto">
