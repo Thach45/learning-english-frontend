@@ -37,3 +37,44 @@ export interface UserAchievement {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface AchievementPagination {
+  page: number;
+  pageSize: number;
+  total: number;
+}
+
+export interface GetAchievementsQuery {
+  page?: number;
+  pageSize?: number;
+  type?: AchievementType;
+  rarity?: AchievementRarity;
+  isActive?: boolean;
+}
+
+export interface GetAchievementsResponse {
+  items: Achievement[];
+  pagination: AchievementPagination;
+}
+
+export interface CreateAchievementPayload {
+  title: string;
+  description: string;
+  type: AchievementType;
+  targetValue: number;
+  duration?: number;
+  rarity: AchievementRarity;
+  icon?: string;
+  xpReward?: number;
+}
+
+export interface UpdateAchievementPayload {
+  title?: string;
+  description?: string;
+  targetValue?: number;
+  duration?: number;
+  rarity?: AchievementRarity;
+  icon?: string;
+  isActive?: boolean;
+  xpReward?: number;
+}

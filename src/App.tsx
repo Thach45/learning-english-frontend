@@ -29,6 +29,7 @@ import AdminUsers from './pages/admin/AdminUsers';
 import AdminPosts from './pages/admin/AdminPosts';
 import AdminComments from './pages/admin/AdminComments';
 import AdminRoles from './pages/admin/AdminRoles';
+import AdminAchievements from './pages/admin/AdminAchievements';
 
 function App() {
   return (
@@ -65,6 +66,7 @@ function App() {
                       <Route path="posts" element={<AdminPosts />} />
                       <Route path="comments" element={<AdminComments />} />
                       <Route path="roles" element={<AdminRoles />} />
+                      <Route path="achievements" element={<AdminAchievements />} />
                     </Route>
                   </Route>
                 </Route>
