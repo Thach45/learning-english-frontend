@@ -23,6 +23,11 @@ import CategoryDetailPage from './pages/CategoryDetail';
 import DictionaryDemo from './components/DictionaryDemo';
 import Community from './pages/Community';
 import QuizPage from './pages/Quiz';
+import AdminLayout from './components/admin/AdminLayout';
+import AdminOverview from './pages/admin/AdminOverview';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminPosts from './pages/admin/AdminPosts';
+import AdminComments from './pages/admin/AdminComments';
 
 function App() {
   return (
@@ -53,6 +58,12 @@ function App() {
                     <Route path="/categories/:id" element={<CategoryDetailPage />} />
                     <Route path="/dictionary" element={<DictionaryDemo />} />
                     <Route path="/community" element={<Community />} />
+                    <Route path="/admin" element={<AdminLayout />}>
+                      <Route index element={<AdminOverview />} />
+                      <Route path="users" element={<AdminUsers />} />
+                      <Route path="posts" element={<AdminPosts />} />
+                      <Route path="comments" element={<AdminComments />} />
+                    </Route>
                   </Route>
                 </Route>
               </Routes>
