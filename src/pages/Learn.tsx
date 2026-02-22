@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Book, Clock, RotateCcw } from 'lucide-react';
-import Flashcard from '../components/pageLearn/FlashcardView';
+import Flashcard from '../components/learn/FlashcardView';
 import { ReviewVocabulary } from '../types';
-import { fetchStudySetVocabulary, updateVocabularyProgress } from '../utils/api';
+import { fetchStudySetVocabulary, updateVocabularyProgress } from '../config/api';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 
 const Learn: React.FC = () => {

@@ -3,8 +3,10 @@ import {
   fetchGamificationStats,
   fetchDailyActivityStats,
   fetchXPEvents,
+  type GamificationStats,
+  type DailyActivity,
+  type XPEventsResponse,
 } from '../services/gamificationService';
-import { GamificationStats, DailyActivity, XPEventsResponse } from '../utils/gamification';
 
 export const GAMIFICATION_KEYS = {
   stats: (userId?: string) => ['gamification', 'stats', userId] as const,

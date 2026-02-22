@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Flame, Calendar, Target, Zap } from 'lucide-react';
-import { gamificationApi } from '../../utils/gamification';
+import { fetchDailyActivityStats } from '../../services/gamificationService';
 
 interface StreakCardProps {
   streak: number;
@@ -46,7 +46,7 @@ const StreakCard: React.FC<StreakCardProps> = ({
           date.setDate(date.getDate() - daysFromMonday + i);
           
           try {
-            const response = await gamificationApi.getDailyActivity(formatDateForAPI(date));
+            const response = await fetchDailyActivityStats(undefined, formatDateForAPI(date));
             const hasActivity = response.wordsLearned > 0 || response.wordsReviewed >= 10;
             activities.push(hasActivity);
           } catch (error) {

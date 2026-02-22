@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Target, Trophy } from 'lucide-react';
 import { UserAchievement } from '../../types/achievement';
-import { achievementApi } from '../../utils/achievement';
+import { getInProgressAchievements } from '../../services/achievementService';
 
 // Custom SVG Icons
 const CustomIcons = {
@@ -64,7 +64,7 @@ const InProgressAchievements: React.FC = () => {
 
   const fetchInProgressAchievements = async () => {
     try {
-      const data = await achievementApi.getUserInProgressAchievements();
+      const data = await getInProgressAchievements();
       setAchievements(data);
     } catch (error) {
       console.error('Error fetching in-progress achievements:', error);

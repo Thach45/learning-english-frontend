@@ -1,4 +1,4 @@
-import api from "../utils/api";
+import api from "../config/api";
 import type { RoleWithPermissions, PermissionItem } from "../types/role";
 
 const unwrap = <T>(res: any): T =>

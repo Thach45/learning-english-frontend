@@ -1,6 +1,7 @@
-import api from "../utils/api";
+import api from "../config/api";
 import type {
   Achievement,
+  UserAchievement,
   GetAchievementsQuery,
   GetAchievementsResponse,
   CreateAchievementPayload,
@@ -35,4 +36,22 @@ export async function updateAchievement(
 export async function deleteAchievement(id: string): Promise<Achievement> {
   const res = await api.delete(`/achievements/${id}`);
   return unwrap<Achievement>(res);
+}
+
+/** Danh sách achievement đã đạt của user */
+export async function getUserAchievements(): Promise<UserAchievement[]> {
+  const res = await api.get("/achievements/me");
+  return res?.data?.data ?? res.data ?? [];
+}
+
+/** Danh sách achievement đang làm dở */
+export async function getInProgressAchievements(): Promise<UserAchievement[]> {
+  const res = await api.get("/achievements/me/in-progress");
+  return res?.data?.data ?? res.data ?? [];
+}
+
+/** Gọi backend check và cập nhật achievements */
+export async function checkAchievements(): Promise<unknown> {
+  const res = await api.post("/achievements/check");
+  return res?.data?.data ?? res.data;
 }

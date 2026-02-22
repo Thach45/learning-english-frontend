@@ -2,7 +2,7 @@ import axios from 'axios';
 import { StudySetStats } from '../types';
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
 });
 
 // Attach access token to every request
@@ -76,7 +76,6 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return api(originalRequest);
       } catch (err) {
-        console.log(err);
         processQueue(err, null);
         return Promise.reject(err);
       } finally {

@@ -1,4 +1,4 @@
-import api from '../utils/api';
+import api from '../config/api';
 import type { UserProfile, UpdateProfilePayload } from '../types/user';
 
 const unwrap = <T>(res: any): T =>

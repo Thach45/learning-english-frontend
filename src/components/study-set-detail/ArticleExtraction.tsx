@@ -12,9 +12,9 @@ import {
   X,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { uploadArticleFile, analyzeText } from '../../utils/upload';
-import { bulkAddVocabularies } from '../../utils/api';
-import useNotificationHelper from '../../utils/notification';
+import { uploadArticleFile, analyzeText } from '../../config/upload';
+import { bulkAddVocabularies } from '../../config/api';
+import useNotificationHelper from '../../config/notification';
 
 
 interface ExtractedWord {

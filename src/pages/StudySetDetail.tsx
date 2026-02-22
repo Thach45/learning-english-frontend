@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, BookOpen, Share2, Users, Calendar, Globe, Lock, Star, X, Lightbulb, BookOpen as BookOpenIcon, PlusCircle, Speaker, Speech, RotateCcw, Search, List, Grid, ChevronLeft, ChevronRight, Edit, Trash } from 'lucide-react';
+import { ArrowLeft, BookOpen, Share2, Users, Calendar, Globe, Lock, Star, X, Search, List, Grid, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AddVocabulary, StudySet, StudySetStats, UpdateVocabulary, Vocabulary, PartOfSpeech, CefrLevel } from '../types';
-import api, { fetchStudySetStats } from '../utils/api';
+import api, { fetchStudySetStats } from '../config/api';
 import { useAuth } from '../context/AuthContext';
-import AddVocabularyForm from '../components/pageStudySetDetail/AddVocabularyForm';
-import OptionalAddVocab, { VocabCreationMode } from '../components/pageStudySetDetail/OptionalAddVocab';
-import AIVocabularySuggestions from '../components/pageStudySetDetail/AIVocabularySuggestions';
-import ArticleExtraction from '../components/pageStudySetDetail/ArticleExtraction';
+import AddVocabularyForm from '../components/study-set-detail/AddVocabularyForm';
+import OptionalAddVocab, { VocabCreationMode } from '../components/study-set-detail/OptionalAddVocab';
+import AIVocabularySuggestions from '../components/study-set-detail/AIVocabularySuggestions';
+import ArticleExtraction from '../components/study-set-detail/ArticleExtraction';
 import { motion } from 'framer-motion';
-import LearningProgressCard from '../components/pageStudySetDetail/LearningProgressCard';
-import VocabularyCard from '../components/pageStudySetDetail/VocabularyCard';
-import { useNotificationHelper } from '../utils/notification';
+import LearningProgressCard from '../components/study-set-detail/LearningProgressCard';
+import VocabularyCard from '../components/study-set-detail/VocabularyCard';
+import { useNotificationHelper } from '../config/notification';
 
 const StudySetDetail: React.FC = () => {
   const { notify } = useNotificationHelper();
@@ -39,8 +39,6 @@ const StudySetDetail: React.FC = () => {
   const [editLoading, setEditLoading] = useState(false);
   const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null);
   const [deleteConfirmVocab, setDeleteConfirmVocab] = useState<Vocabulary | null>(null);
-  // Thêm state cho các loại từ khi có nhiều loại
-  const [partOfSpeechOptions, setPartOfSpeechOptions] = useState<string[]>([]);
   const [selectedPartOfSpeech, setSelectedPartOfSpeech] = useState<string>('');
   const [definitionMap, setDefinitionMap] = useState<Record<string, string>>({});
   const [learningStats, setLearningStats] = useState<StudySetStats>({

@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Zap, BookOpen, Star, Trophy, Target, Clock } from 'lucide-react';
-import { XPEvent, EVENT_TYPE_LABELS } from '../../utils/gamification';
+import { type XPEvent, EVENT_TYPE_LABELS } from '../../services/gamificationService';
 
 interface XPEventsListProps {
   events: XPEvent[];

@@ -15,10 +15,10 @@ import { useCategories } from '../hooks/useCategories';
 import { useStudySets, useFilteredStudySets } from '../hooks/useStudySets';
 
 // Components
-import CreateCategoryModal from '../components/pageCategory/CreateCategoryModal';
-import CreateStudySetModal from '../components/pageStudySets/CreateStudySetModal';
-import EditCategoryModal from '../components/pageCategory/EditCategoryModal';
-import EditStudySetModal from '../components/pageStudySets/EditStudySetModal';
+import CreateCategoryModal from '../components/study-set/CreateCategoryModal';
+import CreateStudySetModal from '../components/study-set/CreateStudySetModal';
+import EditCategoryModal from '../components/study-set/EditCategoryModal';
+import EditStudySetModal from '../components/study-set/EditStudySetModal';
 import ConfirmDeleteModal from '../components/shared/ConfirmDeleteModal';
 
 // ============================================

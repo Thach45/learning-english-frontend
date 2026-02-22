@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, BookOpen, X, ExternalLink, Volume2, Star, Globe, Languages, Plus, ArrowRight } from 'lucide-react';
-import { fetchDictionary } from '../utils/api';
+import { fetchDictionary } from '../config/api';
 
 // --- STYLE DEFINITIONS FOR ANIMATIONS ---
 const animationStyles = `

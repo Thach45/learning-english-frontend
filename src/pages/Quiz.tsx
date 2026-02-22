@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Check, X, RotateCcw, Volume2 } from 'lucide-react';
-import { generateQuiz, submitQuiz, QuizQuestion, QuizResult } from '../utils/api';
+import { generateQuiz, submitQuiz, QuizQuestion, QuizResult } from '../config/api';
 
 const QuizPage: React.FC = () => {
   const [searchParams] = useSearchParams();

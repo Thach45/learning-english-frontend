@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { UserAchievement } from '../types';
-import { achievementService } from '../service/achievement';
+import { getUserAchievements, getInProgressAchievements } from '../services/achievementService';
 
 interface AchievementContextType {
   achievements: UserAchievement[];
@@ -33,8 +33,8 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
   const fetchAchievements = async () => {
     try {
       const [allAchievements, inProgress] = await Promise.all([
-        achievementService.getUserAchievements(),
-        achievementService.getInProgressAchievements()
+        getUserAchievements(),
+        getInProgressAchievements()
       ]);
       setAchievements(allAchievements);
       setInProgressAchievements(inProgress);
