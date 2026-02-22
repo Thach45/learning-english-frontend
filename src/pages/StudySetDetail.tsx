@@ -95,7 +95,7 @@ const StudySetDetail: React.FC = () => {
 
   const handleShare = () => {
     const shareUrl = `${window.location.origin}/study-sets/${id}`;
-    const shareText = `Check out this study set: "${studySet?.title}" with ${vocabularies.length} vocabulary terms!`;
+    const shareText = `Xem bộ học: "${studySet?.title}" với ${vocabularies.length} từ vựng!`;
     
     if (navigator.share) {
       navigator.share({
@@ -204,7 +204,7 @@ const StudySetDetail: React.FC = () => {
 
       if (data.partOfSpeech) {
         notify.custom.info(
-          'Auto-fill Success', 
+          'Tự động điền thành công', 
           `Từ "${newVocab.word}" được xác định là ${data.partOfSpeech.toLowerCase()}`
         );
       }
@@ -321,7 +321,7 @@ const StudySetDetail: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading study set...</p>
+          <p className="text-gray-600">Đang tải bộ học...</p>
         </div>
       </div>
     );
@@ -331,13 +331,13 @@ const StudySetDetail: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Study Set Not Found</h2>
-          <p className="text-gray-600 mb-4">The study set you're looking for doesn't exist.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Không tìm thấy bộ học</h2>
+          <p className="text-gray-600 mb-4">Bộ học bạn tìm không tồn tại.</p>
           <button
             onClick={() => navigate('/study-sets')}
             className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
           >
-            Back to Study Sets
+            Quay lại Học phần
           </button>
         </div>
       </div>
@@ -361,7 +361,7 @@ const StudySetDetail: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 py-8">
       {/* Top Section - Learning Stats */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+      <div className="max-w-7xl  px-4 sm:px-6 lg:px-8 mx-auto mb-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <button
@@ -369,7 +369,7 @@ const StudySetDetail: React.FC = () => {
             className="flex items-center text-gray-600 hover:text-gray-900"
           >
             <ArrowLeft className="h-5 w-5 mr-2" />
-            Back to Study Sets
+            Quay lại Học phần
           </button>
           
           
@@ -398,28 +398,28 @@ const StudySetDetail: React.FC = () => {
               <div className="flex flex-wrap items-center gap-4 mb-4">
                 <div className="flex items-center text-sm text-gray-600">
                   <BookOpen className="h-4 w-4 mr-1" />
-                  {vocabularies.length} terms
+                  {vocabularies.length} từ
                 </div>
                 
                 <div className="flex items-center text-sm text-gray-600">
                   <Users className="h-4 w-4 mr-1" />
-                  {isOwner ? 'Created by you' : 'Created by other user'}
+                  {isOwner ? 'Do bạn tạo' : 'Do người khác tạo'}
                 </div>
                 
                 <div className="flex items-center text-sm text-gray-600">
                   <Calendar className="h-4 w-4 mr-1" />
-                  Updated {new Date(studySet.updatedAt).toLocaleDateString()}
+                  Cập nhật {new Date(studySet.updatedAt).toLocaleDateString()}
                 </div>
 
                 {studySet.isPublic ? (
                   <div className="flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
                     <Globe className="h-3 w-3 mr-1" />
-                    Public
+                    Công khai
                   </div>
                 ) : (
                   <div className="flex items-center px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">
                     <Lock className="h-3 w-3 mr-1" />
-                    Private
+                    Riêng tư
                   </div>
                 )}
 
@@ -460,13 +460,13 @@ const StudySetDetail: React.FC = () => {
       </div>
 
       {/* Bottom Section - Vocabulary List */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Vocabulary Preview */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">
           <div className="p-6 border-b border-gray-200">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <h2 className="text-xl font-semibold text-gray-900">
-                Vocabulary Terms ({vocabularies.length})
+                Từ vựng ({vocabularies.length})
               </h2>
               
               {/* Search and Controls */}
@@ -475,7 +475,7 @@ const StudySetDetail: React.FC = () => {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <input
                     type="text"
-                    placeholder="Search vocabulary..."
+                    placeholder="Tìm từ vựng..."
                     value={searchTerm}
                     onChange={(e) => {
                       setSearchTerm(e.target.value);
@@ -506,7 +506,7 @@ const StudySetDetail: React.FC = () => {
                       onClick={handleOpenAddVocabulary}
                       className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
                     >
-                      + Add Vocabulary
+                      + Thêm từ vựng
                     </button>
                     
 
@@ -541,16 +541,16 @@ const StudySetDetail: React.FC = () => {
             ) : (
               <div className="text-center py-8">
                 <BookOpen className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No vocabulary terms yet</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có từ vựng nào</h3>
                 <p className="text-gray-600 mb-4">
-                  {searchTerm ? 'No results found. Try different search terms.' : 'This study set doesn\'t have any vocabulary terms.'}
+                  {searchTerm ? 'Không tìm thấy. Thử từ khóa khác.' : 'Bộ học này chưa có từ vựng.'}
                 </p>
                 {isOwner && !searchTerm && (
                   <button
                     onClick={handleOpenAddVocabulary}
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
                   >
-                    + Add Vocabulary
+                    + Thêm từ vựng
                   </button>
                 )}
               </div>
@@ -598,23 +598,23 @@ const StudySetDetail: React.FC = () => {
 
         {/* Study Tips */}
         <div className="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">📚 Study Tips</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">📚 Mẹo học</h3>
             <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-700">
               <div className="flex items-start">
                 <Star className="h-4 w-4 text-yellow-500 mr-2 mt-0.5 flex-shrink-0" />
-                <span><strong>Flashcards:</strong> Great for memorizing word meanings and pronunciation</span>
+                <span><strong>Thẻ ghi nhớ:</strong> Giúp ghi nhớ nghĩa và phát âm từ vựng</span>
               </div>
               <div className="flex items-start">
                 <Star className="h-4 w-4 text-yellow-500 mr-2 mt-0.5 flex-shrink-0" />
-                <span><strong>Quiz Mode:</strong> Test your knowledge with various question types</span>
+                <span><strong>Chế độ Quiz:</strong> Kiểm tra kiến thức với nhiều dạng câu hỏi</span>
               </div>
               <div className="flex items-start">
                 <Star className="h-4 w-4 text-yellow-500 mr-2 mt-0.5 flex-shrink-0" />
-                <span><strong>Regular Review:</strong> Come back daily to reinforce your learning</span>
+                <span><strong>Ôn tập đều:</strong> Học mỗi ngày để củng cố kiến thức</span>
               </div>
               <div className="flex items-start">
                 <Star className="h-4 w-4 text-yellow-500 mr-2 mt-0.5 flex-shrink-0" />
-                <span><strong>Practice Speaking:</strong> Use the pronunciation guide to improve speaking</span>
+                <span><strong>Luyện nói:</strong> Dùng hướng dẫn phát âm để cải thiện kỹ năng nói</span>
               </div>
             </div>
           </div>
@@ -683,25 +683,25 @@ const StudySetDetail: React.FC = () => {
             >
               <X className="w-5 h-5" />
             </button>
-            <h3 className="text-xl font-bold mb-4">Edit vocabulary</h3>
+            <h3 className="text-xl font-bold mb-4">Chỉnh sửa từ vựng</h3>
             <div className="space-y-3">
               <input
                 className="w-full border rounded px-3 py-2"
-                placeholder="English word *"
+                placeholder="Từ tiếng Anh *"
                 value={editVocab.word}
                 onChange={e => setEditVocab(v => v ? { ...v, word: e.target.value } : v)}
                 required
               />
               <input
                 className="w-full border rounded px-3 py-2"
-                placeholder="Vietnamese meaning *"
+                placeholder="Nghĩa tiếng Việt *"
                 value={editVocab.meaning}
                 onChange={e => setEditVocab(v => v ? { ...v, meaning: e.target.value } : v)}
                 required
               />
               <input
                 className="w-full border rounded px-3 py-2"
-                placeholder="Pronunciation"
+                placeholder="Phát âm"
                 value={editVocab.pronunciation}
                 onChange={e => setEditVocab(v => v ? { ...v, pronunciation: e.target.value } : v)}
               />
@@ -711,13 +711,13 @@ const StudySetDetail: React.FC = () => {
                   value={editVocab.cefrLevel || ''}
                   onChange={e => setEditVocab(v => v ? { ...v, cefrLevel: e.target.value as CefrLevel } : v)}
                 >
-                  <option value="">Select CEFR level</option>
-                  <option value={CefrLevel.A1} className="text-green-700">A1 - Beginner</option>
-                  <option value={CefrLevel.A2} className="text-emerald-700">A2 - Elementary</option>
-                  <option value={CefrLevel.B1} className="text-blue-700">B1 - Intermediate</option>
-                  <option value={CefrLevel.B2} className="text-indigo-700">B2 - Upper Intermediate</option>
-                  <option value={CefrLevel.C1} className="text-purple-700">C1 - Advanced</option>
-                  <option value={CefrLevel.C2} className="text-pink-700">C2 - Mastery</option>
+                  <option value="">Chọn trình độ CEFR</option>
+                  <option value={CefrLevel.A1} className="text-green-700">A1 - Sơ cấp</option>
+                  <option value={CefrLevel.A2} className="text-emerald-700">A2 - Cơ bản</option>
+                  <option value={CefrLevel.B1} className="text-blue-700">B1 - Trung cấp</option>
+                  <option value={CefrLevel.B2} className="text-indigo-700">B2 - Trung cao cấp</option>
+                  <option value={CefrLevel.C1} className="text-purple-700">C1 - Cao cấp</option>
+                  <option value={CefrLevel.C2} className="text-pink-700">C2 - Thành thạo</option>
                 </select>
                 <Star className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
                   editVocab.cefrLevel ? 'text-yellow-500' : 'text-gray-400'
@@ -734,19 +734,19 @@ const StudySetDetail: React.FC = () => {
               </select>
               <input
                 className="w-full border rounded px-3 py-2"
-                placeholder="Definition"
+                placeholder="Định nghĩa"
                 value={editVocab.definition}
                 onChange={e => setEditVocab(v => v ? { ...v, definition: e.target.value } : v)}
               />
               <input
                 className="w-full border rounded px-3 py-2"
-                placeholder="Example"
+                placeholder="Ví dụ"
                 value={editVocab.example}
                 onChange={e => setEditVocab(v => v ? { ...v, example: e.target.value } : v)}
               />
               <input
                 className="w-full border rounded px-3 py-2"
-                placeholder="Image (URL)"
+                placeholder="Ảnh (URL)"
                 value={editVocab.imageUrl}
                 onChange={e => setEditVocab(v => v ? { ...v, imageUrl: e.target.value } : v)}
               />
@@ -762,7 +762,7 @@ const StudySetDetail: React.FC = () => {
               onClick={handleUpdateVocab}
               disabled={editLoading || !editVocab.word || !editVocab.meaning}
             >
-              {editLoading ? 'Saving...' : 'Save changes'}
+              {editLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
             </button>
           </div>
         </div>
@@ -778,21 +778,21 @@ const StudySetDetail: React.FC = () => {
             >
               <X className="w-5 h-5" />
             </button>
-            <h3 className="text-xl font-bold mb-4 text-red-600">Confirm delete vocabulary</h3>
-            <p className="mb-6">Are you sure you want to delete the word <span className="font-semibold">"{deleteConfirmVocab.word}"</span> ? This action cannot be undone.</p>
+            <h3 className="text-xl font-bold mb-4 text-red-600">Xác nhận xóa từ vựng</h3>
+            <p className="mb-6">Bạn có chắc muốn xóa từ <span className="font-semibold">"{deleteConfirmVocab.word}"</span>? Hành động này không thể hoàn tác.</p>
             <div className="flex justify-end space-x-3">
               <button
                 className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
                 onClick={() => setDeleteConfirmVocab(null)}
               >
-                Cancel
+                Hủy
               </button>
               <button
                 className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white disabled:opacity-60"
                 onClick={handleDeleteVocab}
                 disabled={deleteLoadingId === deleteConfirmVocab.id}
               >
-                {deleteLoadingId === deleteConfirmVocab.id ? 'Deleting...' : 'Delete'}
+                {deleteLoadingId === deleteConfirmVocab.id ? 'Đang xóa...' : 'Xóa'}
               </button>
             </div>
           </div>

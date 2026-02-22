@@ -29,12 +29,12 @@ const LearningProgressCard: React.FC<LearningProgressCardProps> = ({
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <h2 className="text-xl font-semibold text-gray-900">Learning Progress</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Tiến độ học</h2>
           <div className="relative">
             <button
               onClick={() => setShowTooltip(!showTooltip)}
               className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-              aria-label="Help"
+              aria-label="Trợ giúp"
             >
               <HelpCircle className="h-5 w-5" />
             </button>
@@ -44,19 +44,19 @@ const LearningProgressCard: React.FC<LearningProgressCardProps> = ({
               <div className="absolute left-full top-1 mb-2 w-80 bg-gray-900 text-white text-sm rounded-lg p-4 shadow-lg z-10">
                 <div className="space-y-3">
                   <div>
-                    <h4 className="font-semibold text-blue-300 mb-1">📚 Total Words</h4>
-                    <p className="text-gray-300">Tổng số từ vựng trong study set này</p>
+                    <h4 className="font-semibold text-blue-300 mb-1">📚 Tổng số từ</h4>
+                    <p className="text-gray-300">Tổng số từ vựng trong bộ học này</p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-indigo-300 mb-1">🧠 Studied Words</h4>
-                    <p className="text-gray-300">Số từ bạn đã bắt đầu học </p>
+                    <h4 className="font-semibold text-indigo-300 mb-1">🧠 Đã học</h4>
+                    <p className="text-gray-300">Số từ bạn đã bắt đầu học</p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-purple-300 mb-1">⭐ Mastered Words</h4>
-                    <p className="text-gray-300">Số từ bạn đã thuộc hoàn toàn </p>
+                    <h4 className="font-semibold text-purple-300 mb-1">⭐ Đã thuộc</h4>
+                    <p className="text-gray-300">Số từ bạn đã thuộc hoàn toàn</p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-green-300 mb-1">🔄 Need Review</h4>
+                    <h4 className="font-semibold text-green-300 mb-1">🔄 Cần ôn lại</h4>
                     <p className="text-gray-300">Số từ cần ôn lại theo phương pháp Spaced Repetition</p>
                   </div>
                   <div>
@@ -72,7 +72,7 @@ const LearningProgressCard: React.FC<LearningProgressCardProps> = ({
           </div>
         </div>
         <div className="text-sm text-gray-500">
-          Last studied: {new Date().toLocaleDateString()}
+          Ôn lần cuối: {new Date().toLocaleDateString()}
         </div>
       </div>
 
@@ -83,12 +83,12 @@ const LearningProgressCard: React.FC<LearningProgressCardProps> = ({
           <div className="flex items-center justify-between mb-2">
             <BookOpenIcon className="h-6 w-6 text-blue-500" />
             <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-              TOTAL
+              TỔNG
             </span>
           </div>
           <div className="mt-2">
             <div className="text-3xl font-bold text-gray-800">{learningStats.total}</div>
-            <div className="text-sm text-blue-600 font-medium">Total Words</div>
+            <div className="text-sm text-blue-600 font-medium">Tổng số từ</div>
           </div>
         </div>
 
@@ -97,13 +97,13 @@ const LearningProgressCard: React.FC<LearningProgressCardProps> = ({
           <div className="flex items-center justify-between mb-2">
             <Brain className="h-6 w-6 text-indigo-500" />
             <span className="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">
-              STUDIED
+              ĐÃ HỌC
             </span>
           </div>
           <div className="mt-2">
             <div className="text-3xl font-bold text-gray-800">{learningStats.review}</div>
             <div className="text-sm text-indigo-600 font-medium">
-              {calculatePercentage(learningStats.review, learningStats.total)}% Reviewed
+              {calculatePercentage(learningStats.review, learningStats.total)}% đã ôn
             </div>
           </div>
         </div>
@@ -113,13 +113,13 @@ const LearningProgressCard: React.FC<LearningProgressCardProps> = ({
           <div className="flex items-center justify-between mb-2">
             <Star className="h-6 w-6 text-purple-500" />
             <span className="text-xs font-medium text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
-              MASTERED
+              ĐÃ THUỘC
             </span>
           </div>
           <div className="mt-2">
             <div className="text-3xl font-bold text-gray-800">{learningStats.mastered}</div>
             <div className="text-sm text-purple-600 font-medium">
-              {calculatePercentage(learningStats.mastered, learningStats.total)}% Complete
+              {calculatePercentage(learningStats.mastered, learningStats.total)}% hoàn thành
             </div>
           </div>
         </div>
@@ -129,12 +129,12 @@ const LearningProgressCard: React.FC<LearningProgressCardProps> = ({
           <div className="flex items-center justify-between mb-2">
             <BookOpen className="h-6 w-6 text-green-500" />
             <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
-              NEED REVIEW
+              CẦN ÔN
             </span>
           </div>
           <div className="mt-2">
             <div className="text-3xl font-bold text-gray-800">{learningStats.needReview}</div>
-            <div className="text-sm text-green-600 font-medium">Ready to Study</div>
+            <div className="text-sm text-green-600 font-medium">Sẵn sàng học</div>
           </div>
         </div>
       </div>
@@ -148,8 +148,8 @@ const LearningProgressCard: React.FC<LearningProgressCardProps> = ({
             </div>
             <div className="ml-3 flex-1">
               <p className="text-sm text-amber-800">
-                You have <span className="font-semibold">{learningStats.needReview} words</span> that need review. 
-                Keep your memory fresh by reviewing them now!
+                Bạn có <span className="font-semibold">{learningStats.needReview} từ</span> cần ôn lại.
+                Ôn ngay để ghi nhớ lâu hơn!
               </p>
             </div>
             <div className="ml-4">
@@ -157,7 +157,7 @@ const LearningProgressCard: React.FC<LearningProgressCardProps> = ({
                 onClick={onStartLearning}
                 className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow"
               >
-                Review Now
+                Ôn tập ngay
               </button>
             </div>
           </div>
@@ -173,7 +173,7 @@ const LearningProgressCard: React.FC<LearningProgressCardProps> = ({
             </div>
             <div className="ml-3 flex-1">
               <p className="text-sm text-green-800">
-                Great job! You're all caught up. Want to learn some new words?
+                Tuyệt! Bạn đã ôn xong. Học thêm từ mới nhé?
               </p>
             </div>
             <div className="ml-4">
@@ -181,7 +181,7 @@ const LearningProgressCard: React.FC<LearningProgressCardProps> = ({
                 onClick={onStartLearning}
                 className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow"
               >
-                Continue Learning
+                Tiếp tục học
               </button>
             </div>
           </div>
@@ -195,7 +195,7 @@ const LearningProgressCard: React.FC<LearningProgressCardProps> = ({
           className="flex items-center justify-center px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
         >
           <Play className="h-5 w-5 mr-2" />
-          Study with Flashcards
+          Học bằng thẻ ghi nhớ
         </button>
         
         <button
@@ -203,7 +203,7 @@ const LearningProgressCard: React.FC<LearningProgressCardProps> = ({
           className="flex items-center justify-center px-6 py-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
         >
           <Brain className="h-5 w-5 mr-2" />
-          Take Quiz
+          Làm bài quiz
         </button>
       </div>
     </div>

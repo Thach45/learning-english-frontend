@@ -83,7 +83,7 @@ const UserProgressDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8 font-sans">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl px-4 sm:px-6 lg:px-8 mx-auto">
         {/* Main Header */}
         <div className="flex justify-between items-end mb-6">
           <div>

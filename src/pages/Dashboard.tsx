@@ -1,26 +1,26 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { BookOpen, TrendingUp, Star, Trophy, Clock } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { BookOpen, TrendingUp, Star, Trophy, Clock, Settings } from 'lucide-react';
+import { useMe } from '../hooks/useUser';
 import { useGamificationStats, useDailyActivityStats, useXPEvents } from '../hooks/useGamification';
 import XPProgressBar from '../components/gamification/XPProgressBar';
 import StreakCard from '../components/gamification/StreakCard';
 import XPEventsList from '../components/gamification/XPEventsList';
 
 const Dashboard: React.FC = () => {
-    const { user, isAuthLoading } = useAuth();
+    const { data: profile, isLoading: profileLoading } = useMe();
     const navigate = useNavigate();
 
-    const userId = user?.id;
+    const userId = profile?.id;
     const { data: gamificationStats, isLoading: statsLoading } = useGamificationStats(userId);
     const { data: dailyActivity, isLoading: dailyLoading } = useDailyActivityStats(userId);
     const { data: xpEvents, isLoading: xpLoading } = useXPEvents(userId, 10);
     const isLoading = statsLoading || dailyLoading || xpLoading;
 
-    if (isAuthLoading || !user) {
+    if (profileLoading || !profile) {
         return (
             <div className="flex items-center justify-center h-screen">
-                <p>Loading user information...</p>
+                <p className="text-gray-600">Đang tải...</p>
             </div>
         );
     }
@@ -28,28 +28,28 @@ const Dashboard: React.FC = () => {
     const stats = [
         {
             label: 'Words Learned',
-            value: gamificationStats?.totalWordsLearned || user.totalWordsLearned,
+            value: gamificationStats?.totalWordsLearned ?? profile.totalWordsLearned,
             icon: BookOpen,
             color: 'text-blue-600',
             bgColor: 'bg-blue-100'
         },
         {
             label: 'Current Streak',
-            value: `${gamificationStats?.streak || user.streak} days`,
+            value: `${gamificationStats?.streak ?? profile.streak} days`,
             icon: TrendingUp,
             color: 'text-green-600',
             bgColor: 'bg-green-100'
         },
         {
             label: 'Level',
-            value: gamificationStats?.level || user.level,
+            value: gamificationStats?.level ?? profile.level,
             icon: Star,
             color: 'text-purple-600',
             bgColor: 'bg-purple-100'
         },
         {
             label: 'XP Points',
-            value: gamificationStats?.xp || user.xp,
+            value: gamificationStats?.xp ?? profile.xp,
             icon: Trophy,
             color: 'text-yellow-600',
             bgColor: 'bg-yellow-100'
@@ -64,21 +64,28 @@ const Dashboard: React.FC = () => {
                     <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-blue-500 bg-blue-50 flex items-center justify-center">
                        
                             <img
-                                src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`}
-                                alt={user.name}
+                                src={profile.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.name}`}
+                                alt={profile.name}
                                 className="w-full h-full object-cover"
                             />
                         
                     </div>
                 </div>
-                <div>
+                <div className="flex-1">
                     <h1 className="text-3xl font-bold text-gray-900 mb-1">
-                        Welcome back, {user.name}! 👋
+                        {profile.name}! 👋
                     </h1>
                     <p className="text-gray-600">
-                        Ready to expand your vocabulary today?
+                        {profile.bio || 'Ready to expand your vocabulary today?'}
                     </p>
                 </div>
+                <Link
+                    to="/settings"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition"
+                >
+                    <Settings className="h-4 w-4" />
+                    Cài đặt
+                </Link>
             </div>
 
             {/* Stats Grid */}
@@ -158,25 +165,25 @@ const Dashboard: React.FC = () => {
                         <div className="flex items-center justify-between">
                             <span className="text-sm text-gray-600">Total XP Earned</span>
                             <span className="font-semibold text-gray-900">
-                                {gamificationStats?.xp || user.xp} XP
+                                {gamificationStats?.xp ?? profile.xp} XP
                             </span>
                         </div>
                         <div className="flex items-center justify-between">
                             <span className="text-sm text-gray-600">Current Level</span>
                             <span className="font-semibold text-gray-900">
-                                Level {gamificationStats?.level || user.level}
+                                Level {gamificationStats?.level ?? profile.level}
                             </span>
                         </div>
                         <div className="flex items-center justify-between">
                             <span className="text-sm text-gray-600">Learning Streak</span>
                             <span className="font-semibold text-gray-900">
-                                {gamificationStats?.streak || user.streak} days
+                                {gamificationStats?.streak ?? profile.streak} days
                             </span>
                         </div>
                         <div className="flex items-center justify-between">
                             <span className="text-sm text-gray-600">Words</span>
                             <span className="font-semibold text-gray-900">
-                                {gamificationStats?.totalWordsLearned || user.totalWordsLearned}
+                                {gamificationStats?.totalWordsLearned ?? profile.totalWordsLearned}
                             </span>
                         </div>
                     </div>

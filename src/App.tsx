@@ -16,6 +16,7 @@ import StudySetDetail from './pages/StudySetDetail';
 import Learn from './pages/Learn';
 import Achievements from './pages/Achievements';
 import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
 import Categories from './pages/Vocabularies';
@@ -48,10 +49,11 @@ function App() {
                 <Route element={<Layout />}>
                   <Route element={<ProtectedRoute />}>
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/settings" element={<Settings />} />
                     <Route path="/profile/:id" element={<Profile />} />
-                    <Route path="/study-sets" element={<StudySets />} />
+                    {/* <Route path="/study-sets" element={<StudySets />} /> */}
                     {/* <Route path="/study-sets/create" element={<CreateStudySet />} /> */}
-                    <Route path="/study-sets/:id" element={<StudySetDetail />} />
+                    {/* <Route path="/study-sets/:id" element={<StudySetDetail />} /> */}
                     <Route path="/learn/:studySetId/flashcards" element={<Learn />} />
                     <Route path="/learn/quiz" element={<QuizPage />} />
                     <Route path="/achievements" element={<Achievements />} />

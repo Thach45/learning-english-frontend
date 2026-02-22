@@ -568,7 +568,7 @@ const StudySetDashboard: React.FC = () => {
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
       {/* Hero / Search Section */}
       <div className="border-slate-200 pb-8 pt-6 px-6 sm:px-12 lg:px-12">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6">
             <div>
