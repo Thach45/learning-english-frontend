@@ -29,7 +29,7 @@ const AboutFeatures: React.FC = () => {
                 </div>
                 <h4 className="text-2xl font-bold text-gray-900 mb-3 tracking-tight">AI Trích xuất từ vựng</h4>
                 <p className="text-gray-500 leading-relaxed text-base">
-                  Đừng học từ vựng lẻ tẻ. Chỉ cần dán URL hoặc nội dung bài báo, AI của chúng tôi sẽ tự động phân tích và trích xuất các từ vựng cốt lõi thành Bộ thẻ (Study Set) ngay lập tức.
+                  Đừng học từ vựng lẻ tẻ. Chỉ cần dán URL hoặc nội dung bài báo, AI của chúng tôi sẽ tự động phân tích và trích xuất các từ vựng cốt lõi thành Bộ thẻ từ vựng ngay lập tức.
                 </p>
               </div>
 

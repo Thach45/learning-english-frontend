@@ -117,7 +117,7 @@ const AboutCommunity: React.FC = () => {
                 </div>
                 <div>
                   <strong className="text-gray-900 block text-base mb-1">
-                    Chia sẻ & Lưu bộ thẻ (Study Set Share)
+                    Chia sẻ & Lưu bộ thẻ từ vựng
                   </strong>
                   <span className="text-gray-500 text-sm leading-relaxed">
                     Công khai thư viện từ vựng cá nhân để mọi người cùng học. Một nút bấm để lưu ngay bộ thẻ của người
@@ -131,7 +131,7 @@ const AboutCommunity: React.FC = () => {
                 </div>
                 <div>
                   <strong className="text-gray-900 block text-base mb-1">
-                    Bài đăng & Bình luận (User Post)
+                    Bài đăng & Bình luận
                   </strong>
                   <span className="text-gray-500 text-sm leading-relaxed">
                     Đăng bài thảo luận, đặt câu hỏi ngữ pháp và tương tác qua các comment dưới mỗi bài học.
