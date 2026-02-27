@@ -707,18 +707,25 @@ const StudySetDashboard: React.FC = () => {
             )}
           </div>
         ) : (
-          <div className="text-center py-20 bg-white rounded-2xl border border-slate-100 border-dashed">
-            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="text-center py-16 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
               <Search className="w-8 h-8 text-slate-400" />
             </div>
-            <h3 className="text-lg font-medium text-slate-900 mb-1">Không tìm thấy học phần nào</h3>
-            <p className="text-slate-500">Thử thay đổi từ khóa hoặc bộ lọc danh mục.</p>
-            <button 
-              onClick={() => { setSearchTerm(''); setActiveCategoryId('ALL'); }}
-              className="mt-4 text-blue-600 hover:underline font-medium"
-            >
-              Xóa bộ lọc
-            </button>
+            <h3 className="text-lg font-semibold text-slate-900 mb-1">
+              Không tìm thấy học phần nào
+            </h3>
+            <p className="text-sm text-slate-500 mb-6 max-w-md mx-auto">
+              Thử điều chỉnh bộ lọc tìm kiếm, hoặc tạo học phần đầu tiên để bắt đầu lộ trình học từ vựng của bạn.
+            </p>
+            {activeView === 'library' && (
+              <button
+                onClick={() => setShowCreateStudySetModal(true)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Tạo học phần mới</span>
+              </button>
+            )}
           </div>
         )}
       </main>

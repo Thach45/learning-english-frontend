@@ -8,7 +8,7 @@ import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Pages
-import Landing from './pages/Landing';
+import Landing from './pages/About';
 import Dashboard from './pages/Dashboard';
 import StudySetDetail from './pages/StudySetDetail';
 import Learn from './pages/Learn';

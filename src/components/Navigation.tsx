@@ -119,8 +119,14 @@ const Navigation: React.FC = () => {
               onClick={() => handleNavigation('/dashboard')}
               className="flex-shrink-0 flex items-center gap-2 text-gray-900 hover:opacity-90 transition"
             >
-              <BookOpen className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold">VocabMaster</span>
+              <div className="h-8 w-8 rounded-xl flex items-center justify-center overflow-hidden">
+                <img
+                  src="/blinky.png"
+                  alt="BlinkyVocab logo"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <span className="text-xl font-bold">BlinkyVocab</span>
             </button>
 
             {/* Menu - giữa (căn giữa vùng còn lại) */}
@@ -143,8 +149,14 @@ const Navigation: React.FC = () => {
         <div className="px-4 sm:px-6">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <BookOpen className="h-6 w-6 text-blue-600" />
-              <span className="ml-2 text-lg font-bold text-gray-900">VocabMaster</span>
+              <div className="h-8 w-8 rounded-xl flex items-center justify-center overflow-hidden">
+                <img
+                  src="/blinky.png"
+                  alt="BlinkyVocab logo"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <span className="ml-2 text-lg font-bold text-gray-900">BlinkyVocab</span>
             </div>
             
             <button
