@@ -45,13 +45,13 @@ const AboutHero: React.FC<AboutHeroProps> = ({ me }) => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <button
                   onClick={() => navigate('/register')}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-colors shadow-sm flex items-center justify-center gap-2"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-xl font-semibold text-s transition-colors shadow-sm flex items-center justify-center gap-2"
                 >
                   Tạo tài khoản miễn phí <ArrowRight className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => navigate('/login')}
-                  className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-8 py-4 rounded-xl font-semibold text-lg transition-colors flex items-center justify-center gap-2 shadow-sm"
+                  className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-8 py-4 rounded-xl font-semibold text-s transition-colors flex items-center justify-center gap-2 shadow-sm"
                 >
                   <PlayCircle className="w-5 h-5 text-indigo-600" /> Đã có tài khoản? Đăng nhập
                 </button>
