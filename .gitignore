@@ -73,7 +73,7 @@ web_modules/
 
 # Gatsby files
 .cache/
-public
+
 
 # Next.js files
 .next/
@@ -95,7 +95,7 @@ dist/
 # Remix files
 .cache/
 build/
-public/build/
+
 
 # Astro files
 dist/
