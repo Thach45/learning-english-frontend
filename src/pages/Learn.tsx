@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Book, Clock, RotateCcw } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Flashcard from '../components/learn/FlashcardView';
 import { ReviewVocabulary } from '../types';
 import { fetchStudySetVocabulary, updateVocabularyProgress } from '../config/api';
@@ -73,39 +73,35 @@ const Learn: React.FC = () => {
 
   if (mode === 'flashcard') {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
+      <div className="flex min-h-[100dvh] flex-col bg-gray-50">
+        <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
+          <header className="mb-2 flex shrink-0 items-center justify-between gap-3">
             <button
+              type="button"
               onClick={() => navigate(`/study-sets/${studySetId}`)}
-              className="flex items-center text-gray-600 hover:text-gray-900"
+              className="flex items-center gap-2 text-sm font-medium text-gray-600 transition hover:text-gray-900"
             >
-              <ArrowLeft className="h-5 w-5 mr-2" />
-              Back to Study Set
+              <ArrowLeft className="h-5 w-5 shrink-0" />
+              <span className="hidden sm:inline">Quay lại học phần</span>
             </button>
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-900">
-                {studyMode === 'practice' ? 'Practice Mode' : 'Review Mode'}
-              </h1>
-              <p className="text-gray-600">
-                Card {currentIndex + 1} of {vocabularyList.length}
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-600">Session Progress</p>
-              <p className="font-medium text-gray-900">
-                {sessionStats.correct}/{sessionStats.total} correct
-              </p>
-            </div>
+            <p className="text-right text-xs text-gray-500 sm:text-sm">
+              <span className="tabular-nums font-semibold text-gray-800">
+                {sessionStats.correct}/{sessionStats.total}
+              </span>
+              <span className="ml-1 hidden sm:inline">từ đúng</span>
+            </p>
+          </header>
+          {/* min-h-0 + flex-1: thẻ + dock trong viewport, không phải cuộn xuống tìm dock */}
+          <div className="flex min-h-0 flex-1 flex-col">
+            <Flashcard
+              vocabulary={vocabularyList[currentIndex]}
+              onNext={handleFlashcardNext}
+              onResult={handleFlashcardResult}
+              showResult={true}
+              currentIndex={currentIndex}
+              totalCards={vocabularyList.length}
+            />
           </div>
-          <Flashcard
-            vocabulary={vocabularyList[currentIndex]}
-            onNext={handleFlashcardNext}
-            onResult={handleFlashcardResult}
-            showResult={true}
-            currentIndex={currentIndex}
-            totalCards={vocabularyList.length}
-          />
         </div>
       </div>
     );

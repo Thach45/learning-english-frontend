@@ -9,7 +9,10 @@ import OptionalAddVocab, { VocabCreationMode } from '../components/study-set-det
 import AIVocabularySuggestions from '../components/study-set-detail/AIVocabularySuggestions';
 import ArticleExtraction from '../components/study-set-detail/ArticleExtraction';
 import { motion } from 'framer-motion';
-import LearningProgressCard from '../components/study-set-detail/LearningProgressCard';
+import { LearningProgressCard } from '../components/study-set-detail/LearningProgressCard';
+import StartLearnModeModal from '../components/study-set-detail/StartLearnModeModal';
+import StartQuizModeModal from '../components/study-set-detail/StartQuizModeModal';
+import type { StudyLearnMode, QuizMode } from '../components/study-set-detail/studySetModes';
 import VocabularyCard from '../components/study-set-detail/VocabularyCard';
 import { useNotificationHelper } from '../config/notification';
 
@@ -56,6 +59,19 @@ const StudySetDetail: React.FC = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const [addingSelected, setAddingSelected] = useState(false);
   const itemsPerPage = 5;
+
+  const [showStartLearnModeModal, setShowStartLearnModeModal] = useState(false);
+  const [selectedStartLearnMode, setSelectedStartLearnMode] = useState<StudyLearnMode>('practice');
+
+  const openStartLearnModeModal = () => setShowStartLearnModeModal(true);
+  const closeStartLearnModeModal = () => setShowStartLearnModeModal(false);
+
+  const [showStartQuizModeModal, setShowStartQuizModeModal] = useState(false);
+  const [selectedStartQuizMode, setSelectedStartQuizMode] = useState<QuizMode>('multiple_choice');
+
+  const openStartQuizModeModal = () => setShowStartQuizModeModal(true);
+  const closeStartQuizModeModal = () => setShowStartQuizModeModal(false);
+
   const handleCloseModal = () => {
     setShowAddVocabModal(false);
     setCreationMode(null);
@@ -85,8 +101,8 @@ const StudySetDetail: React.FC = () => {
 
   
 
-  const handleStartQuiz = () => {
-    navigate(`/learn/quiz?studySetId=${id}`);
+  const handleStartQuiz = (quizMode: QuizMode) => {
+    navigate(`/learn/quiz?studySetId=${id}&mode=${quizMode}`);
   };
 
 
@@ -306,12 +322,8 @@ const StudySetDetail: React.FC = () => {
     }
   };
 
-  const handleStartLearning = () => {
-    // Nếu số từ cần ôn tập bằng số từ đã học, tự động chuyển sang review mode
-   
-    const mode = learningStats.needReview > 0 ? 'practice' : 'review';
-    console.log("mode", mode);
-    navigate(`/learn/${id}/flashcards?mode=${mode}`);
+  const handleStartLearning = (studyMode: StudyLearnMode) => {
+    navigate(`/learn/${id}/flashcards?mode=${studyMode}`);
   };
 
   if (loading) {
@@ -359,77 +371,79 @@ const StudySetDetail: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 py-8">
       {/* Top Section - Learning Stats */}
-      <div className="max-w-7xl  px-4 sm:px-6 lg:px-8 mx-auto mb-8">
+      <div className="mx-auto mb-8 max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <button
             onClick={() => navigate('/study-sets')}
             className="flex items-center text-gray-600 hover:text-gray-900"
           >
-            <ArrowLeft className="h-5 w-5 mr-2" />
+            <ArrowLeft className="mr-2 h-5 w-5" />
             Quay lại Học phần
           </button>
-          
-          
         </div>
-        {/* Study Set Info */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-7 mb-8">
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-3">
-                <h1 className="text-3xl">{studySet.title}</h1>
-                <div className="flex items-center space-x-3">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleShare}
-                    className="flex items-center px-4 py-2 text-gray-700 rounded-lg transition-all duration-200"
-                  >
-                    <Share2 className="h-4 w-4 mr-2" />    
-                  </motion.button>
-                 
-                </div>
+
+        {/* Thông tin học phần — tách riêng khỏi tiến độ học */}
+        <div className="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:p-7">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">{studySet.title}</h1>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleShare}
+                  type="button"
+                  className="flex shrink-0 items-center self-start rounded-lg px-3 py-2 text-gray-700 transition-all duration-200 hover:bg-gray-100"
+                  aria-label="Chia sẻ"
+                >
+                  <Share2 className="mr-2 h-4 w-4" />
+                </motion.button>
               </div>
-              
-              <p className="text-gray-600 text-lg mb-4">{studySet.description}</p>
-              
-              <div className="flex flex-wrap items-center gap-4 mb-4">
+
+              <p className="mb-4 text-lg text-gray-600">{studySet.description}</p>
+
+              <div className="mb-4 flex flex-wrap items-center gap-3 sm:gap-4">
                 <div className="flex items-center text-sm text-gray-600">
-                  <BookOpen className="h-4 w-4 mr-1" />
+                  <BookOpen className="mr-1 h-4 w-4 shrink-0" />
                   {vocabularies.length} từ
                 </div>
-                
+
                 <div className="flex items-center text-sm text-gray-600">
-                  <Users className="h-4 w-4 mr-1" />
+                  <Users className="mr-1 h-4 w-4 shrink-0" />
                   {isOwner ? 'Do bạn tạo' : 'Do người khác tạo'}
                 </div>
-                
+
                 <div className="flex items-center text-sm text-gray-600">
-                  <Calendar className="h-4 w-4 mr-1" />
+                  <Calendar className="mr-1 h-4 w-4 shrink-0" />
                   Cập nhật {new Date(studySet.updatedAt).toLocaleDateString()}
                 </div>
 
                 {studySet.isPublic ? (
-                  <div className="flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                    <Globe className="h-3 w-3 mr-1" />
+                  <div className="flex items-center rounded-full bg-green-100 px-3 py-1 text-sm text-green-800">
+                    <Globe className="mr-1 h-3 w-3" />
                     Công khai
                   </div>
                 ) : (
-                  <div className="flex items-center px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">
-                    <Lock className="h-3 w-3 mr-1" />
+                  <div className="flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-800">
+                    <Lock className="mr-1 h-3 w-3" />
                     Riêng tư
                   </div>
                 )}
 
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  studySet.level === 'beginner' ? 'bg-green-100 text-green-800' :
-                  studySet.level === 'intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-red-100 text-red-800'
-                }`}>
+                <span
+                  className={`rounded-full px-3 py-1 text-sm font-medium ${
+                    studySet.level === 'beginner'
+                      ? 'bg-green-100 text-green-800'
+                      : studySet.level === 'intermediate'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-red-100 text-red-800'
+                  }`}
+                >
                   {studySet.level}
                 </span>
-                
-                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+
+                <span className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800">
                   {studySet.category.name}
                 </span>
               </div>
@@ -439,7 +453,7 @@ const StudySetDetail: React.FC = () => {
                   {studySet.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="px-2 py-1 bg-gray-100 text-gray-600 rounded-lg text-sm hover:bg-gray-200 transition-colors cursor-pointer"
+                      className="cursor-pointer rounded-lg bg-gray-100 px-2 py-1 text-sm text-gray-600 transition-colors hover:bg-gray-200"
                     >
                       #{tag}
                     </span>
@@ -448,13 +462,14 @@ const StudySetDetail: React.FC = () => {
               )}
             </div>
           </div>
-          {/* Learning Stats Section */}
-          <LearningProgressCard
-            learningStats={learningStats}
-            onStartLearning={handleStartLearning}
-            onStartQuiz={handleStartQuiz}
-          />
         </div>
+
+        {/* Tiến độ học — card riêng, cùng lề với khối trên & danh sách từ */}
+        <LearningProgressCard
+          learningStats={learningStats}
+          onStartLearning={openStartLearnModeModal}
+          onStartQuiz={openStartQuizModeModal}
+        />
       </div>
 
       {/* Bottom Section - Vocabulary List */}
@@ -765,6 +780,28 @@ const StudySetDetail: React.FC = () => {
           </div>
         </div>
       )}
+
+      <StartLearnModeModal
+        open={showStartLearnModeModal}
+        onClose={closeStartLearnModeModal}
+        selectedMode={selectedStartLearnMode}
+        onSelectMode={setSelectedStartLearnMode}
+        onStart={() => {
+          handleStartLearning(selectedStartLearnMode);
+          closeStartLearnModeModal();
+        }}
+      />
+
+      <StartQuizModeModal
+        open={showStartQuizModeModal}
+        onClose={closeStartQuizModeModal}
+        selectedMode={selectedStartQuizMode}
+        onSelectMode={setSelectedStartQuizMode}
+        onStart={() => {
+          handleStartQuiz(selectedStartQuizMode);
+          closeStartQuizModeModal();
+        }}
+      />
 
       {/* Delete Confirm Modal */}
       {deleteConfirmVocab && (

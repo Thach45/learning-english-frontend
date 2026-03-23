@@ -17,7 +17,7 @@ import Settings from './pages/Settings';
 import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
 import Community from './pages/Community';
-import QuizPage from './pages/Quiz';
+
 import AdminLayout from './components/admin/AdminLayout';
 import AdminOverview from './pages/admin/AdminOverview';
 import AdminUsers from './pages/admin/AdminUsers';
@@ -26,6 +26,7 @@ import AdminComments from './pages/admin/AdminComments';
 import AdminRoles from './pages/admin/AdminRoles';
 import AdminAchievements from './pages/admin/AdminAchievements';
 import StudySetDashboard from './pages/StudySetDashboard';
+import QuizPage from './pages/QuizPage';
 
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
                     <Route path="/study-sets/:id" element={<StudySetDetail />} />
                     <Route path="/learn/:studySetId/flashcards" element={<Learn />} />
                     <Route path="/learn/quiz" element={<QuizPage />} />
+                    {/* <Route path="/learn/quiz?mode=fill_in_the_blank" element={<QuizPage />} /> */}
                     <Route path="/study-sets" element={<StudySetDashboard />} />
             
                     <Route path="/community" element={<Community />} />

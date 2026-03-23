@@ -1,12 +1,69 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Check, X, RotateCcw, Volume2 } from 'lucide-react';
-import { generateQuiz, submitQuiz, QuizQuestion, QuizResult } from '../config/api';
+import { generateQuiz, QuizQuestion, QuizResult } from '../config/api';
+
+function normalizeQuizAnswer(s: string): string {
+  return s.normalize('NFC').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function isAnswerMatch(
+  user: string,
+  correct: string,
+  quizMode: 'multiple_choice' | 'fill_in_the_blank'
+): boolean {
+  if (quizMode === 'fill_in_the_blank') {
+    return normalizeQuizAnswer(user) === normalizeQuizAnswer(correct);
+  }
+  return user === correct;
+}
+
+function getScoreMessage(score: number): string {
+  if (score >= 90) return 'Excellent! You mastered this quiz! 🎉';
+  if (score >= 70) return 'Great job! Keep practicing! 👍';
+  if (score >= 50) return 'Good effort! Review the words you missed. 📚';
+  return "Don't give up! Practice makes perfect! 💪";
+}
+
+/** Chấm điểm hoàn toàn trên client (không gọi API submit) */
+function buildLocalQuizResult(
+  questions: QuizQuestion[],
+  answers: Array<{ vocabularyId: string; userAnswer: string }>,
+  quizMode: 'multiple_choice' | 'fill_in_the_blank'
+): QuizResult {
+  let correct = 0;
+  const details = questions.map((q, i) => {
+    const a = answers[i];
+    const userAnswer = a?.userAnswer ?? '';
+    const ok = isAnswerMatch(userAnswer, q.correctAnswer, quizMode);
+    if (ok) correct++;
+    return {
+      vocabularyId: q.vocabularyId,
+      word: q.word,
+      isCorrect: ok,
+      userAnswer,
+      correctAnswer: q.correctAnswer,
+    };
+  });
+  const total = questions.length;
+  const score = total > 0 ? (correct / total) * 100 : 0;
+  return {
+    score: Math.round(score * 100) / 100,
+    correct,
+    total,
+    message: getScoreMessage(score),
+    details,
+  };
+}
 
 const QuizPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const studySetId = searchParams.get('studySetId') || '';
+  const quizModeParam = searchParams.get('mode');
+  const quizMode = (quizModeParam === 'fill_in_the_blank' ? 'fill_in_the_blank' : 'multiple_choice') as
+    | 'multiple_choice'
+    | 'fill_in_the_blank';
 
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -15,7 +72,6 @@ const QuizPage: React.FC = () => {
   const [score, setScore] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Array<{ vocabularyId: string; userAnswer: string }>>([]);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<QuizResult | null>(null);
 
   useEffect(() => {
@@ -24,12 +80,12 @@ const QuizPage: React.FC = () => {
       return;
     }
     loadQuestions();
-  }, [studySetId]);
+  }, [studySetId, quizMode]);
 
   const loadQuestions = async () => {
     try {
       setLoading(true);
-      const data = await generateQuiz(studySetId, 10, 'multiple_choice');
+      const data = await generateQuiz(studySetId, 10, quizMode);
       setQuestions(data);
     } catch (error) {
       console.error('Error loading quiz:', error);
@@ -46,16 +102,16 @@ const QuizPage: React.FC = () => {
   };
 
   const handleSubmitAnswer = () => {
-    if (!selectedAnswer || isAnswered) return;
+    if (!selectedAnswer.trim() || isAnswered) return;
 
     const currentQ = questions[currentQuestion];
-    const isCorrect = selectedAnswer === currentQ.correctAnswer;
+    const isCorrect = isAnswerMatch(selectedAnswer, currentQ.correctAnswer, quizMode);
 
     setIsAnswered(true);
     
     const newAnswer = {
       vocabularyId: currentQ.vocabularyId,
-      userAnswer: selectedAnswer,
+      userAnswer: selectedAnswer.trim(),
     };
     const updatedAnswers = [...userAnswers, newAnswer];
     setUserAnswers(updatedAnswers);
@@ -79,18 +135,15 @@ const QuizPage: React.FC = () => {
     setIsAnswered(false);
   };
 
-  const handleCompleteQuiz = async (answers?: Array<{ vocabularyId: string; userAnswer: string }>) => {
-    try {
-      setSubmitting(true);
-      const answersToSubmit = answers || userAnswers;
-      const quizResult = await submitQuiz(studySetId, answersToSubmit);
-      setResult(quizResult);
-    } catch (error) {
-      console.error('Error submitting quiz:', error);
-      alert('Failed to submit quiz');
-    } finally {
-      setSubmitting(false);
-    }
+  const handleFillInputChange = (value: string) => {
+    if (isAnswered) return;
+    setSelectedAnswer(value);
+  };
+
+  const handleCompleteQuiz = (answers?: Array<{ vocabularyId: string; userAnswer: string }>) => {
+    const answersToSubmit = answers || userAnswers;
+    const quizResult = buildLocalQuizResult(questions, answersToSubmit, quizMode);
+    setResult(quizResult);
   };
 
   // Loading
@@ -219,7 +272,8 @@ const QuizPage: React.FC = () => {
 
   const currentQ = questions[currentQuestion];
   const progress = ((currentQuestion) / questions.length) * 100;
-  const isCorrect = isAnswered && selectedAnswer === currentQ.correctAnswer;
+  const isCorrect =
+    isAnswered && isAnswerMatch(selectedAnswer, currentQ.correctAnswer, quizMode);
 
   return (
     <div className="min-h-screen bg-slate-50 p-6">
@@ -252,83 +306,126 @@ const QuizPage: React.FC = () => {
 
         {/* Question Card */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          {/* Question Header */}
-          <div className="bg-slate-50 px-8 py-6 border-b border-slate-200">
-            <p className="text-sm text-slate-500 mb-2">Select the correct meaning</p>
-            <div className="flex items-center gap-4">
-              <h1 className="text-3xl font-bold text-slate-900">{currentQ.word}</h1>
-              {currentQ.pronunciation && (
-                <span className="text-lg text-slate-400">{currentQ.pronunciation}</span>
-              )}
-              <button className="p-2 hover:bg-slate-200 rounded-full transition-colors">
-                <Volume2 className="w-5 h-5 text-slate-500" />
-              </button>
-            </div>
-          </div>
-
-          {/* Options Grid 2x2 */}
-          <div className="p-8">
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              {currentQ.options.map((option, index) => {
-                const isSelected = selectedAnswer === option;
-                const isCorrectOption = option === currentQ.correctAnswer;
-                const showCorrect = isAnswered && isCorrectOption;
-                const showWrong = isAnswered && isSelected && !isCorrectOption;
-
-                let borderColor = 'border-slate-200';
-                let bgColor = 'bg-white hover:bg-slate-50';
-                let textColor = 'text-slate-700';
-                
-                if (showCorrect) {
-                  borderColor = 'border-emerald-500';
-                  bgColor = 'bg-emerald-50';
-                  textColor = 'text-emerald-700';
-                } else if (showWrong) {
-                  borderColor = 'border-red-500';
-                  bgColor = 'bg-red-50';
-                  textColor = 'text-red-700';
-                } else if (isSelected) {
-                  borderColor = 'border-indigo-500';
-                  bgColor = 'bg-indigo-50';
-                  textColor = 'text-indigo-700';
-                }
-
-                const labels = ['A', 'B', 'C', 'D'];
-
-                return (
-                  <button
-                    key={index}
-                    onClick={() => handleAnswerSelect(option)}
-                    disabled={isAnswered}
-                    className={`relative p-6 text-left rounded-xl border-2 transition-all ${borderColor} ${bgColor} ${
-                      isAnswered ? 'cursor-default' : 'cursor-pointer hover:border-slate-300'
-                    }`}
-                  >
-                    <div className="flex items-start gap-4">
-                      <span className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${
-                        showCorrect ? 'bg-emerald-500 text-white' :
-                        showWrong ? 'bg-red-500 text-white' :
-                        isSelected ? 'bg-indigo-500 text-white' :
-                        'bg-slate-100 text-slate-600'
-                      }`}>
-                        {labels[index]}
-                      </span>
-                      <span className={`font-medium ${textColor} leading-relaxed`}>{option}</span>
-                    </div>
-                    {showCorrect && (
-                      <div className="absolute top-4 right-4">
-                        <Check className="w-6 h-6 text-emerald-500" />
-                      </div>
-                    )}
-                    {showWrong && (
-                      <div className="absolute top-4 right-4">
-                        <X className="w-6 h-6 text-red-500" />
-                      </div>
-                    )}
+          {quizMode === 'multiple_choice' ? (
+            <>
+              {/* Question Header */}
+              <div className="bg-slate-50 px-8 py-6 border-b border-slate-200">
+                <p className="text-sm text-slate-500 mb-2">Select the correct meaning</p>
+                <div className="flex items-center gap-4">
+                  <h1 className="text-3xl font-bold text-slate-900">{currentQ.word}</h1>
+                  {currentQ.pronunciation && (
+                    <span className="text-lg text-slate-400">{currentQ.pronunciation}</span>
+                  )}
+                  <button type="button" className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+                    <Volume2 className="w-5 h-5 text-slate-500" />
                   </button>
-                );
-              })}
-            </div>
+                </div>
+              </div>
+
+              {/* Options Grid 2x2 */}
+              <div className="p-8">
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  {currentQ.options.map((option, index) => {
+                    const isSelected = selectedAnswer === option;
+                    const isCorrectOption = option === currentQ.correctAnswer;
+                    const showCorrect = isAnswered && isCorrectOption;
+                    const showWrong = isAnswered && isSelected && !isCorrectOption;
+
+                    let borderColor = 'border-slate-200';
+                    let bgColor = 'bg-white hover:bg-slate-50';
+                    let textColor = 'text-slate-700';
+
+                    if (showCorrect) {
+                      borderColor = 'border-emerald-500';
+                      bgColor = 'bg-emerald-50';
+                      textColor = 'text-emerald-700';
+                    } else if (showWrong) {
+                      borderColor = 'border-red-500';
+                      bgColor = 'bg-red-50';
+                      textColor = 'text-red-700';
+                    } else if (isSelected) {
+                      borderColor = 'border-indigo-500';
+                      bgColor = 'bg-indigo-50';
+                      textColor = 'text-indigo-700';
+                    }
+
+                    const labels = ['A', 'B', 'C', 'D'];
+
+                    return (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => handleAnswerSelect(option)}
+                        disabled={isAnswered}
+                        className={`relative p-6 text-left rounded-xl border-2 transition-all ${borderColor} ${bgColor} ${
+                          isAnswered ? 'cursor-default' : 'cursor-pointer hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-start gap-4">
+                          <span
+                            className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${
+                              showCorrect
+                                ? 'bg-emerald-500 text-white'
+                                : showWrong
+                                  ? 'bg-red-500 text-white'
+                                  : isSelected
+                                    ? 'bg-indigo-500 text-white'
+                                    : 'bg-slate-100 text-slate-600'
+                            }`}
+                          >
+                            {labels[index]}
+                          </span>
+                          <span className={`font-medium ${textColor} leading-relaxed`}>{option}</span>
+                        </div>
+                        {showCorrect && (
+                          <div className="absolute top-4 right-4">
+                            <Check className="w-6 h-6 text-emerald-500" />
+                          </div>
+                        )}
+                        {showWrong && (
+                          <div className="absolute top-4 right-4">
+                            <X className="w-6 h-6 text-red-500" />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="bg-slate-50 px-8 py-6 border-b border-slate-200">
+                <p className="text-sm font-medium text-slate-600 mb-1">Nghĩa tiếng Việt → điền từ tiếng Anh</p>
+                <p className="text-xs text-slate-500">Không gợi ý từ gốc — chỉ dựa vào nghĩa bên dưới.</p>
+              </div>
+              <div className="p-8">
+                <p className="text-lg text-slate-800 whitespace-pre-wrap leading-relaxed mb-6">
+                  {currentQ.question}
+                </p>
+                <label className="block text-sm font-medium text-slate-600 mb-2">Từ tiếng Anh</label>
+                <input
+                  type="text"
+                  value={selectedAnswer}
+                  onChange={(e) => handleFillInputChange(e.target.value)}
+                  disabled={isAnswered}
+                  autoComplete="off"
+                  spellCheck={false}
+                  className={`w-full rounded-xl border-2 px-4 py-3 text-lg text-slate-900 placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/30 ${
+                    isAnswered
+                      ? isCorrect
+                        ? 'border-emerald-400 bg-emerald-50/50'
+                        : 'border-red-400 bg-red-50/50'
+                      : 'border-slate-200 bg-white hover:border-slate-300'
+                  }`}
+                  placeholder="Type the English word..."
+                />
+              </div>
+            </>
+          )}
+
+          {/* Feedback + actions (shared) */}
+          <div className={`${quizMode === 'multiple_choice' ? 'px-8 pb-8 -mt-2' : 'px-8 pb-8'} pt-0`}>
 
             {/* Feedback Panel */}
             {isAnswered && (
@@ -395,10 +492,13 @@ const QuizPage: React.FC = () => {
             {/* Submit Button */}
             {!isAnswered && (
               <button
+                type="button"
                 onClick={handleSubmitAnswer}
-                disabled={!selectedAnswer}
+                disabled={
+                  quizMode === 'fill_in_the_blank' ? !selectedAnswer.trim() : !selectedAnswer
+                }
                 className={`w-full py-4 rounded-xl font-semibold text-lg transition-all ${
-                  selectedAnswer
+                  (quizMode === 'fill_in_the_blank' ? selectedAnswer.trim() : selectedAnswer)
                     ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm'
                     : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                 }`}
@@ -409,12 +509,6 @@ const QuizPage: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {submitting && (
-        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="animate-spin rounded-full h-10 w-10 border-2 border-slate-300 border-t-indigo-600"></div>
-        </div>
-      )}
 
       <style>{`
         @keyframes slideUp {

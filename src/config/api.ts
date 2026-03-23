@@ -137,11 +137,8 @@ export interface QuizQuestion {
   pronunciation?: string;
   definition?: string;
   example?: string;
-}
-
-export interface QuizAnswer {
-  vocabularyId: string;
-  userAnswer: string;
+  mode?: 'multiple_choice' | 'fill_in_the_blank';
+  fillBlankType?: 'meaning' | 'word';
 }
 
 export interface QuizResult {
@@ -169,17 +166,6 @@ export async function generateQuiz(
 
   const res = await api.get('/quiz/generate', { params });
   
-  return res.data.data.data;
-}
-
-export async function submitQuiz(
-  studySetId: string,
-  answers: QuizAnswer[]
-): Promise<QuizResult> {
-  const res = await api.post('/quiz/submit', {
-    studySetId,
-    answers,
-  });
   return res.data.data.data;
 }
 
