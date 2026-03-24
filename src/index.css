@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Stagger cho ambient blobs (Learn / Quiz) — trùng với FlashcardView */
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
 /* Particles sau feedback — biến --dx / --dy (px) */
 @keyframes feedback-particle {
   0% {
